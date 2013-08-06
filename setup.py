@@ -62,7 +62,7 @@ setup(name='python-weed',
       long_description=LONG_DESCRIPTION,
       platforms=['any'],
       classifiers=CLASSIFIERS,
-      install_requires=[],
+      install_requires=['requests'],
       cmdclass = {'test' : PyTest},
 #      test_suite='py.test',
 )
