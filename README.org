@@ -1,4 +1,4 @@
-*  What is it?
+*  python-weed. what is it?
   ============
   a python module of weed-fs (https://code.google.com/p/weed-fs/).
 
