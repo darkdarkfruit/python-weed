@@ -28,6 +28,13 @@
 python interface of weed-fs.
 (https://code.google.com/p/weed-fs/)
 
+note:
+    ensure weed master-server and at least one volume-server are up
+    default:
+        master-server: 127.0.0.1:9333
+        volume-server: 127.0.0.1:8080
+
+
 '''
 
 
@@ -58,7 +65,7 @@ class WeedMaster(object):
         self.url_status = self.url_base + '/dir/status'
 
 
-    def get_assign_key(self):
+    def acquire_assign_info(self):
         """
         acquire an assign key from master-server.
         assign_key is in json format like below:

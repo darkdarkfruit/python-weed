@@ -49,7 +49,7 @@ def test_WeedMaster():
     assert master.__repr__()
 
     # assign
-    assign_key_dict = master.get_assign_key()
+    assign_key_dict = master.acquire_assign_info()
     assert isinstance(assign_key_dict, dict)
     assert assign_key_dict.has_key('fid')
     assert assign_key_dict['fid'].replace(',', '') > 0x001
