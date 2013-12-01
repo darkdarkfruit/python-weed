@@ -239,7 +239,7 @@ class WeedVolume(object):
             result = None
         return result
 
-    def post_file(self, absolute_file_path, fid):
+    def put_file(self, absolute_file_path, fid):
         parse_results = ParseResult(scheme='http', netloc='%s:%s' % (self.host,int(self.port)), path='%s' %(fid), params='', query='', fragment='')
         url = urlunparse(parse_results)
         print url

@@ -89,7 +89,7 @@ def test_WeedVolume():
     assert isinstance(status_dict['Volumes'], list)
 
 
-def test_post_file():
+def test_put_file():
     master = WeedMaster()
     assert master.__repr__()
 
@@ -125,7 +125,7 @@ def test_post_file():
     file_to_post = '/home/roger/data.xml'
 
     print volume.get_status()
-    volume.post_file(os.path.abspath(file_to_post),fid)
+    volume.put_file(os.path.abspath(file_to_post),fid)
     assert False
 
 
