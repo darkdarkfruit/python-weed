@@ -30,10 +30,11 @@ python interface of weed-fs.
 
 '''
 
+from urlparse import urlunparse, ParseResult
 
 __all__ = ['WeedMaster', 'WeedVolume']
 
-
+import os
 import json
 import requests
 
@@ -237,6 +238,26 @@ class WeedVolume(object):
             print('Could not get status of this volume: %s. Exception is: %s' % (self.url_status, e))
             result = None
         return result
+
+    def post_file(self, absolute_file_path, fid):
+        parse_results = ParseResult(scheme='http', netloc='%s:%s' % (self.host,int(self.port)), path='%s' %(fid), params='', query='', fragment='')
+        url = urlunparse(parse_results)
+        print url
+        headers = {'content-type': 'text/xml'}
+        files = {'file': (os.path.basename(absolute_file_path), open(absolute_file_path, 'rb')), 'headers' : headers}
+        try:
+            r = requests.post(url, files=files);
+        except Exception as e:
+            print('Could not post file. Exception is: %s' % e)
+
+        # weed-fs returns a 200 but the content may contain an error
+        if r.status_code == 200:
+            print r.status_code
+            result = json.loads(r.content)
+            if 'error' in result:
+                print result['error']
+            else:
+                print result
 
 
     def __repr__(self):

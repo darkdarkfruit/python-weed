@@ -39,10 +39,11 @@ note:
         volume-server: 127.0.0.1:8080
 
 '''
+import os
 
 from  .weed import *
 
-
+from urlparse import urlparse
 
 def test_WeedMaster():
     master = WeedMaster()
@@ -63,7 +64,6 @@ def test_WeedMaster():
     locations_list = lookup_dict['locations']
     assert locations_list[0].has_key('url')
     assert locations_list[0].has_key('publicUrl')
-
 
     # vacuum
     vacuum_dict = master.vacuum()
@@ -88,6 +88,45 @@ def test_WeedVolume():
     assert status_dict.has_key('Volumes')
     assert isinstance(status_dict['Volumes'], list)
 
+
+def test_post_file():
+    master = WeedMaster()
+    assert master.__repr__()
+
+    # assign
+    assign_key_dict = master.get_assign_key()
+    assert isinstance(assign_key_dict, dict)
+    assert assign_key_dict.has_key('fid')
+    assert assign_key_dict['fid'].replace(',', '') > 0x001
+    fid = assign_key_dict['fid']
+    volume_id = fid.split(',')[0]
+
+    # lookup
+    lookup_dict = master.lookup(fid)
+    assert isinstance(lookup_dict, dict)
+    assert lookup_dict.has_key('locations')
+    locations_list = lookup_dict['locations']
+    assert locations_list[0].has_key('url')
+    assert locations_list[0].has_key('publicUrl')
+
+    volume_url = 'http://' + locations_list[0]['publicUrl']
+    url = urlparse(volume_url)
+    #print url.hostname
+    #print url.port
+    #assert False
+
+    volume = WeedVolume(host=url.hostname, port=url.port)
+    status_dict = volume.get_status()
+    assert isinstance(status_dict, dict)
+    assert status_dict.has_key('Version')
+    assert status_dict.has_key('Volumes')
+    assert isinstance(status_dict['Volumes'], list)
+
+    file_to_post = '/home/roger/data.xml'
+
+    print volume.get_status()
+    volume.post_file(os.path.abspath(file_to_post),fid)
+    assert False
 
 
 
