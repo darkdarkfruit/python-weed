@@ -240,11 +240,11 @@ class WeedVolume(object):
         return result
 
     def put_file(self, absolute_file_path, fid):
-        parse_results = ParseResult(scheme='http', netloc='%s:%s' % (self.host,int(self.port)), path='%s' %(fid), params='', query='', fragment='')
-        url = urlunparse(parse_results)
+        url_parts = ParseResult(scheme='http', netloc='%s:%s' % (self.host,int(self.port)), path='%s' %(fid), params='', query='', fragment='')
+        url = urlunparse(url_parts)
         print url
         headers = {'content-type': 'text/xml'}
-        files = {'file': (os.path.basename(absolute_file_path), open(absolute_file_path, 'rb')), 'headers' : headers}
+        files = {'file': (os.path.basename(absolute_file_path), open(absolute_file_path, 'rb'))}
         try:
             r = requests.post(url, files=files);
         except Exception as e:
@@ -259,6 +259,35 @@ class WeedVolume(object):
             else:
                 print result
 
+    def get_file(self,fid):
+        url_parts = ParseResult(scheme='http', netloc='%s:%s' % (self.host,int(self.port)), path='%s' %(fid), params='', query='', fragment='')
+        url = urlunparse(url_parts)
+        print url
+
+        try:
+            r = requests.get(url);
+        except Exception as e:
+            print('Could not get file. Exception is: %s' % e)
+
+        if r.status_code == 200:
+            return r.content
+        elif r.status_code == 404:
+            print 'file with fid %s not found' % fid
+            return None
+        else:
+            return None
+
+    def delete_file(self,fid):
+        url_parts = ParseResult(scheme='http', netloc='%s:%s' % (self.host,int(self.port)), path='%s' %(fid), params='', query='', fragment='')
+        url = urlunparse(url_parts)
+        print url
+
+        try:
+            r = requests.delete(url);
+        except Exception as e:
+            print('Could not delete file. Exception is: %s' % e)
+
+        return r.status_code
 
     def __repr__(self):
         return '<WeedVolume: %s:%s>' % (self.host, self.port)

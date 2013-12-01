@@ -89,7 +89,7 @@ def test_WeedVolume():
     assert isinstance(status_dict['Volumes'], list)
 
 
-def test_put_file():
+def test_put_get_delete_file():
     master = WeedMaster()
     assert master.__repr__()
 
@@ -111,9 +111,6 @@ def test_put_file():
 
     volume_url = 'http://' + locations_list[0]['publicUrl']
     url = urlparse(volume_url)
-    #print url.hostname
-    #print url.port
-    #assert False
 
     volume = WeedVolume(host=url.hostname, port=url.port)
     status_dict = volume.get_status()
@@ -126,9 +123,16 @@ def test_put_file():
 
     print volume.get_status()
     volume.put_file(os.path.abspath(file_to_post),fid)
-    assert False
 
+    data = volume.get_file(fid)
+    assert data
+    print data
+    with open(file_to_post, 'r') as fd:
+        file_data = fd.read()
+    assert data == file_data
 
+    status = volume.delete_file(fid)
+    assert status == 202
 
 
 if __name__ == '__main__':
