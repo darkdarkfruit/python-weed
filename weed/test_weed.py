@@ -112,7 +112,8 @@ def test_put_get_delete_file():
     volume_url = 'http://' + locations_list[0]['publicUrl']
     url = urlparse(volume_url)
 
-    volume = WeedVolume(host=url.hostname, port=url.port)
+    #volume = WeedVolume(host=url.hostname, port=url.port)
+    volume = master.get_volume(fid)
     status_dict = volume.get_status()
     assert isinstance(status_dict, dict)
     assert status_dict.has_key('Version')
@@ -121,8 +122,9 @@ def test_put_get_delete_file():
 
     file_to_post = '/home/roger/data.xml'
 
-    print volume.get_status()
-    volume.put_file(os.path.abspath(file_to_post),fid)
+    put_result = volume.put_file(os.path.abspath(file_to_post),fid)
+    assert not 'error' in put_result
+    assert 'size' in put_result
 
     data = volume.get_file(fid)
     assert data
@@ -131,9 +133,10 @@ def test_put_get_delete_file():
         file_data = fd.read()
     assert data == file_data
 
-    status = volume.delete_file(fid)
-    assert status == 202
-
+    delete_result = volume.delete_file(fid)
+    assert delete_result
+    assert not 'error' in delete_result
+    assert 'size' in delete_result
 
 if __name__ == '__main__':
     test_WeedMaster()

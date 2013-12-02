@@ -30,7 +30,7 @@ python interface of weed-fs.
 
 '''
 
-from urlparse import urlunparse, ParseResult
+from urlparse import urlparse, urlunparse, ParseResult
 
 __all__ = ['WeedMaster', 'WeedVolume']
 
@@ -107,6 +107,21 @@ class WeedMaster(object):
             result = None
         return result
 
+    def get_volume(self, fid):
+        lookup_dict = self.lookup(fid)
+        if 'locations' in lookup_dict:
+            locations_list = lookup_dict['locations']
+        else:
+            return None
+
+        # create a url from the parts and parse it to get to the hostname and port
+        url_parts = ParseResult(scheme='http', netloc='%s' % locations_list[0]['publicUrl'], path='', params='', query='', fragment='')
+        volume_url = urlunparse(url_parts)
+        #volume_url = 'http://' + locations_list[0]['publicUrl']
+        url = urlparse(volume_url)
+
+        volume = WeedVolume(host=url.hostname, port=url.port)
+        return volume
 
     def vacuum(self):
         """
@@ -249,15 +264,18 @@ class WeedVolume(object):
             r = requests.post(url, files=files);
         except Exception as e:
             print('Could not post file. Exception is: %s' % e)
+            return None
 
         # weed-fs returns a 200 but the content may contain an error
+        result = json.loads(r.content)
         if r.status_code == 200:
             print r.status_code
-            result = json.loads(r.content)
             if 'error' in result:
                 print result['error']
             else:
                 print result
+
+        return result
 
     def get_file(self,fid):
         url_parts = ParseResult(scheme='http', netloc='%s:%s' % (self.host,int(self.port)), path='%s' %(fid), params='', query='', fragment='')
@@ -287,7 +305,7 @@ class WeedVolume(object):
         except Exception as e:
             print('Could not delete file. Exception is: %s' % e)
 
-        return r.status_code
+        return r.content
 
     def __repr__(self):
         return '<WeedVolume: %s:%s>' % (self.host, self.port)
