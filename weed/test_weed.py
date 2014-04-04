@@ -40,7 +40,7 @@ note:
 
 '''
 
-from  .weed import *
+from weed import *
 
 
 
