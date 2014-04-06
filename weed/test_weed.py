@@ -41,7 +41,7 @@ note:
 '''
 import os
 
-from  .weed import *
+from weed import *
 
 from urlparse import urlparse
 
