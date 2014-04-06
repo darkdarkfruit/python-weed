@@ -30,12 +30,13 @@ python interface of weed-fs.
 
 '''
 
-from urlparse import urlparse, urlunparse, ParseResult
+from urlparse import urljoin, urlunparse, ParseResult
 
 __all__ = ['WeedVolume']
 
-import os
 import json
+import logging
+import os
 import requests
 
 
@@ -53,9 +54,10 @@ class WeedVolume(object):
         """
         self.host = host
         self.port = port
-        self.url_base = 'http://' + self.host + ':' + str(self.port)
-        self.url_status = self.url_base + '/status'
-
+        self.url_base_parts = ParseResult(scheme='http', netloc='%s:%d' % (host, port),
+            path='', params='', query='', fragment='')
+        self.url_base = urlunparse(self.url_base_parts)
+        self.url_status = urljoin(self.url_base, '/status')
 
     def get_status(self):
         """
@@ -68,62 +70,53 @@ class WeedVolume(object):
         try:
             result = json.loads(r.content)
         except Exception as e:
-            print('Could not get status of this volume: %s. Exception is: %s' % (self.url_status, e))
+            logging.warning("Could not get status of this volume: %s. Exception is: %s" % (self.url_status, e))
             result = None
         return result
 
     def put_file(self, absolute_file_path, fid):
-        url_parts = ParseResult(scheme='http', netloc='%s:%s' % (self.host,int(self.port)), path='%s' %(fid), params='', query='', fragment='')
-        url = urlunparse(url_parts)
-        print url
+        url = urljoin(self.url_base, fid)
         headers = {'content-type': 'text/xml'}
         files = {'file': (os.path.basename(absolute_file_path), open(absolute_file_path, 'rb'))}
         try:
             r = requests.post(url, files=files);
         except Exception as e:
-            print('Could not post file. Exception is: %s' % e)
+            logging.warning("Could not post file. Exception is: %s" % e)
             return None
 
         # weed-fs returns a 200 but the content may contain an error
         result = json.loads(r.content)
         if r.status_code == 200:
-            print r.status_code
             if 'error' in result:
-                print result['error']
+                logging.warning(result['error'])
             else:
-                print result
+                logging.debug(result)
 
         return result
 
-    def get_file(self,fid):
-        url_parts = ParseResult(scheme='http', netloc='%s:%s' % (self.host,int(self.port)), path='%s' %(fid), params='', query='', fragment='')
-        url = urlunparse(url_parts)
-        print url
-
+    def get_file(self, fid):
+        url = urljoin(self.url_base, fid)
         try:
             r = requests.get(url);
         except Exception as e:
-            print('Could not get file. Exception is: %s' % e)
+            logging.warning("Could not get file. Exception is: %s" % e)
 
         if r.status_code == 200:
             return r.content
         elif r.status_code == 404:
-            print 'file with fid %s not found' % fid
+            logging.warning("File with fid %s not found" % fid)
             return None
         else:
             return None
 
-    def delete_file(self,fid):
-        url_parts = ParseResult(scheme='http', netloc='%s:%s' % (self.host,int(self.port)), path='%s' %(fid), params='', query='', fragment='')
-        url = urlunparse(url_parts)
-        print url
-
+    def delete_file(self, fid):
+        url = urljoin(self.url_base, fid)
         try:
             r = requests.delete(url);
         except Exception as e:
-            print('Could not delete file. Exception is: %s' % e)
+            logging.warning("Could not delete file. Exception is: %s" % e)
 
         return r.content
 
     def __repr__(self):
-        return '<WeedVolume: %s:%s>' % (self.host, self.port)
+        return "<WeedVolume: %s:%s>" % (self.host, self.port)
