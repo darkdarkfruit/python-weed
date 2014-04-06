@@ -120,8 +120,10 @@ def test_put_get_delete_file():
     assert status_dict.has_key('Volumes')
     assert isinstance(status_dict['Volumes'], list)
 
-    file_to_post = '/home/roger/data.xml'
+    file_to_post = '/tmp/python-weed_test.xml'
 
+    with open(file_to_post, 'w') as tmp_file:
+        tmp_file.write("nonsense " * 1000000)
     put_result = volume.put_file(os.path.abspath(file_to_post),fid)
     assert not 'error' in put_result
     assert 'size' in put_result
