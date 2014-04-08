@@ -1,6 +1,8 @@
 from setuptools import setup, find_packages, Command
 import os
 
+from weed.version import __version__
+
 DESCRIPTION = "A python module for weed-fs"
 
 LONG_DESCRIPTION = None
@@ -9,16 +11,6 @@ try:
 except:
     pass
 
-def get_version(version_tuple):
-    version = '%s.%s' % (version_tuple[0], version_tuple[1])
-    if version_tuple[2]:
-        version = '%s.%s' % (version, version_tuple[2])
-    return version
-
-init = os.path.join(os.path.dirname(__file__), 'weed', '__init__.py')
-version_line = filter(lambda l: l.startswith('VERSION'), open(init))[0]
-VERSION = get_version(eval(version_line.split('=')[-1]))
-print VERSION
 
 CLASSIFIERS = [
     'Development Status :: 4 - Beta',
@@ -51,7 +43,7 @@ class PyTest(Command):
 
 
 setup(name='python-weed',
-      version=VERSION,
+      version=__version__,
       packages=find_packages(),
       author='darkdarkfruit',
       author_email='darkdarkfruit@{nospam}gmail.com',

@@ -39,10 +39,11 @@ note:
         volume-server: 127.0.0.1:8080
 
 '''
+import os
 
 from weed import *
 
-
+from urlparse import urlparse
 
 def test_WeedMaster():
     master = WeedMaster()
@@ -63,7 +64,6 @@ def test_WeedMaster():
     locations_list = lookup_dict['locations']
     assert locations_list[0].has_key('url')
     assert locations_list[0].has_key('publicUrl')
-
 
     # vacuum
     vacuum_dict = master.vacuum()
@@ -89,8 +89,56 @@ def test_WeedVolume():
     assert isinstance(status_dict['Volumes'], list)
 
 
+def test_put_get_delete_file():
+    master = WeedMaster()
+    assert master.__repr__()
 
+    # assign
+    assign_key_dict = master.get_assign_key()
+    assert isinstance(assign_key_dict, dict)
+    assert assign_key_dict.has_key('fid')
+    assert assign_key_dict['fid'].replace(',', '') > 0x001
+    fid = assign_key_dict['fid']
+    volume_id = fid.split(',')[0]
 
+    # lookup
+    lookup_dict = master.lookup(fid)
+    assert isinstance(lookup_dict, dict)
+    assert lookup_dict.has_key('locations')
+    locations_list = lookup_dict['locations']
+    assert locations_list[0].has_key('url')
+    assert locations_list[0].has_key('publicUrl')
+
+    volume_url = 'http://' + locations_list[0]['publicUrl']
+    url = urlparse(volume_url)
+
+    #volume = WeedVolume(host=url.hostname, port=url.port)
+    volume = master.get_volume(fid)
+    status_dict = volume.get_status()
+    assert isinstance(status_dict, dict)
+    assert status_dict.has_key('Version')
+    assert status_dict.has_key('Volumes')
+    assert isinstance(status_dict['Volumes'], list)
+
+    file_to_post = '/tmp/python-weed_test.xml'
+
+    with open(file_to_post, 'w') as tmp_file:
+        tmp_file.write("nonsense " * 1000000)
+    put_result = volume.put_file(os.path.abspath(file_to_post),fid)
+    assert not 'error' in put_result
+    assert 'size' in put_result
+
+    data = volume.get_file(fid)
+    assert data
+    print data
+    with open(file_to_post, 'r') as fd:
+        file_data = fd.read()
+    assert data == file_data
+
+    delete_result = volume.delete_file(fid)
+    assert delete_result
+    assert not 'error' in delete_result
+    assert 'size' in delete_result
 
 if __name__ == '__main__':
     test_WeedMaster()
