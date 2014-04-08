@@ -46,7 +46,8 @@ import requests
 import logging
 import random
 import StringIO
-logger = logging.getLogger()
+import urlparse
+LOGGER = logging.getLogger()
 
 
 class WeedAssignKey(dict):
@@ -55,27 +56,55 @@ class WeedAssignKey(dict):
     {"count":1,"fid":"3,01637037d6","url":"127.0.0.1:8080","publicUrl":"localhost:8080"}
 
     '''
-    def __init__(self):
+    def __init__(self, json_of_weed_response=None):
 
         self['fid'] = ''
         self['count'] = 0
         self['url'] = ''
         self['publicUrl'] = ''
-        self['full_url'] = 'http://' + self['url']
-        self['full_publicUrl'] = 'http://' + self['publicUrl']
-        self['fid_full_url'] = self['full_url'] + '/' + self['fid']
-        self['fid_full_publicUrl'] = self['full_publicUrl'] + '/' + self['fid']
+
+        if json_of_weed_response:
+            try:
+                d = json.loads(json_of_weed_response)
+                self.update(d)
+            except Exception as e:
+                LOGGER.error('Error for json.loads "%s".\nException: %s'
+                             % (json_of_weed_response, e))
+
         for k, v in self.items():
             setattr(self, k, v)
         super(WeedAssignKey, self).__init__()
 
-    def update_full_urls(self):
-        ''' update "full_url" and "full_publicUrl" '''
+
+
+class WeedAssignKeyExtended(WeedAssignKey):
+    ''' extend weed-assign-key for adding these keys:
+
+      'full_url', 'full_public_url', 'fid_full_url', 'fid_full_publicUrl':
+
+      represents:
         self['full_url'] = 'http://' + self['url']
         self['full_publicUrl'] = 'http://' + self['publicUrl']
         self['fid_full_url'] = self['full_url'] + '/' + self['fid']
         self['fid_full_publicUrl'] = self['full_publicUrl'] + '/' + self['fid']
 
+    '''
+    def __init__(self, json_of_weed_response=None):
+        super(WeedAssignKeyExtended, self).__init__(json_of_weed_response)
+        self['full_url'] = urlparse.urljoin('http://', self['url'])
+        self['full_publicUrl'] = urlparse.urljoin('http://', self['publicUrl'])
+        self['fid_full_url'] = urlparse.urljoin(self['full_url'], self['fid'])
+        self['fid_full_publicUrl'] = urlparse.urljoin(self['full_publicUrl'], self['fid'])
+        for k, v in self.items():
+            setattr(self, k, v)
+
+
+    def update_full_urls(self):
+        ''' update "full_url" and "full_publicUrl" '''
+        self['full_url'] = urlparse.urljoin('http://', self['url'])
+        self['full_publicUrl'] = urlparse.urljoin('http://', self['publicUrl'])
+        self['fid_full_url'] = urlparse.urljoin(self['full_url'], self['fid'])
+        self['fid_full_publicUrl'] = urlparse.urljoin(self['full_publicUrl'], self['fid'])
 
 
 
@@ -116,7 +145,8 @@ class WeedMaster(object):
             r = requests.get(self.url_assign)
             result = json.loads(r.content)
         except Exception as e:
-            print('Could not get status of this volume: %s. Exception is: %s' % (self.url_status, e))
+            LOGGER.error('Could not get status of this volume: %s. Exception is: %s'
+                         % (self.url_status, e))
             result = None
         return result
 
@@ -141,18 +171,19 @@ class WeedMaster(object):
         """
         assign_key_url = self.url_assign + '?count=' + str(count)
         dst_volume_url = None
-        wak = WeedAssignKey()
+        wak = WeedAssignKeyExtended()
         try:
-            logger.debug('Getting new dst_volume_url with master-assign-key-url: %s' % assign_key_url)
+            LOGGER.debug('Getting new dst_volume_url with master-assign-key-url: %s' % assign_key_url)
             r = requests.get(assign_key_url)
             key_dict = json.loads(r.content)
 
             wak.update(key_dict)
             wak.update_full_urls()
 
-            logger.info('Successfuly got dst_volume_url: %s' % dst_volume_url)
+            LOGGER.info('Successfuly got dst_volume_url: %s' % dst_volume_url)
         except Exception as e:
-            print('Could not get new assign key from the assign url: %s. Exception is: %s' % (assign_key_url, e))
+            LOGGER.error('Could not get new assign key from the assign url: %s. Exception is: %s'
+                         % (assign_key_url, e))
         return wak
 
 
@@ -180,7 +211,7 @@ class WeedMaster(object):
             r = requests.get(self.url_lookup + '?volumeId=%s' % volume_id)
             result = json.loads(r.content)
         except Exception as e:
-            print('Could not get status of this volume: %s. Exception is: %s' % (self.url_status, e))
+            LOGGER.error('Could not get status of this volume: %s. Exception is: %s' % (self.url_status, e))
             result = None
         return result
 
@@ -257,7 +288,7 @@ class WeedMaster(object):
             r = requests.get(self.url_vacuum)
             result = json.loads(r.content)
         except Exception as e:
-            print('Could not get status of this volume: %s. Exception is: %s' % (self.url_status, e))
+            LOGGER.error('Could not get status of this volume: %s. Exception is: %s' % (self.url_status, e))
             result = None
         return result
 
@@ -274,7 +305,7 @@ class WeedMaster(object):
             r = requests.get(self.url_status)
             result = json.loads(r.content)
         except Exception as e:
-            print('Could not get status of this volume: %s. Exception is: %s' % (self.url_status, e))
+            LOGGER.error('Could not get status of this volume: %s. Exception is: %s' % (self.url_status, e))
             result = None
         return result
 
@@ -313,7 +344,7 @@ class WeedVolume(object):
         try:
             result = json.loads(r.content)
         except Exception as e:
-            print('Could not get status of this volume: %s. Exception is: %s' % (self.url_status, e))
+            LOGGER.error('Could not get status of this volume: %s. Exception is: %s' % (self.url_status, e))
             result = None
         return result
 
@@ -358,7 +389,7 @@ class WeedOperation(object):
         try:
             r = self.master.lookup(volume_id)
             # _url = WEEDFS_MASTER_URL + '/dir/lookup?volumeId=%s' % volume_id
-            # logger.debug('lookup volume by url: %s' % _url)
+            # LOGGER.debug('lookup volume by url: %s' % _url)
             # r = requests.get(_url)
             result = json.loads(r.content)
             locations = result['locations']
@@ -367,24 +398,22 @@ class WeedOperation(object):
             location = locations[random.randint(0, len(locations) - 1)]
             full_url = 'http://%s/%s' % (location['url'], fid)
         except Exception as e:
-            print('Could not get volume location of this fid: %s. Exception is: %s' % (fid, e))
+            LOGGER.error('Could not get volume location of this fid: %s. Exception is: %s' % (fid, e))
             result = None
         return full_url
 
 
-
+    @staticmethod
     def save_file_to_weed(self, fp, fid_full_url, fname=''):
         """
         save fp(file-pointer, file-description) to remote weed
-
-        @wak -> WeedAssignKey
         """
         tmp_uploading_file_name = fname or 'a.unknown'
         rsp = requests.post(fid_full_url, files={'file' : (tmp_uploading_file_name, fp)})
-        # logger.debug(rsp.request.headers)
+        # LOGGER.debug(rsp.request.headers)
         if not rsp.json().has_key('size'): # post new file fails
-            err_msg = 'Could not save file on weed-fs with fid: %s, fid_full_url: %s' % (fid, fid_full_url)
-            logger.error(err_msg)
+            err_msg = 'Could not save file on weed-fs with fid_full_url: %s' % (fid_full_url)
+            LOGGER.error(err_msg)
             return (False, err_msg)
         data = {
             'fid_full_url' : fid_full_url,
@@ -404,12 +433,12 @@ class WeedOperation(object):
         fid_full_url = 'wrong_url'
         try:
             wak = self.master.acquire_new_assign_key()
-            logger.debug('Creating file: fp: %s, fname: %s, fid_full_url: %s' % (fp, fname, fid_full_url))
-            return self.save_file_to_weed(fp, wak.fid_full_url, fname)
+            LOGGER.debug('Creating file: fp: %s, fname: %s, fid_full_url: %s'
+                         % (fp, fname, fid_full_url))
+            return WeedOperation.save_file_to_weed(fp, wak.fid_full_url, fname)
         except Exception as e:
             err_msg = 'Could not create file: fp: %s, fname: %s, fid_full_url: %s, e: %s' % (fp, fname, fid_full_url, e)
-            print(err_msg)
-            logger.error(err_msg)
+            LOGGER.error(err_msg)
             return None
 
 
@@ -424,7 +453,7 @@ class WeedOperation(object):
         fid_full_url = 'wrong_url'
         try:
             fid_full_url = self.get_fid_full_url(fid)
-            logger.debug('Reading file(just_url:%s): fid: %s, fname: %s, fid_full_url: %s' % (just_url, fid, fname, fid_full_url))
+            LOGGER.debug('Reading file(just_url:%s): fid: %s, fname: %s, fid_full_url: %s' % (just_url, fid, fname, fid_full_url))
             if just_url:
                 return fid_full_url
             else:
@@ -432,8 +461,7 @@ class WeedOperation(object):
                 return rsp
         except Exception as e:
             err_msg = 'Could not read file(just_url:%s): fid: %s, fname: %s, fid_full_url: %s, e: %s' % (just_url, fid, fname, fid_full_url, e)
-            print(err_msg)
-            logger.error(err_msg)
+            LOGGER.error(err_msg)
             return None
 
 
@@ -444,12 +472,11 @@ class WeedOperation(object):
         fid_full_url = 'wrong_url'
         try:
             fid_full_url = self.get_fid_full_url(fid)
-            logger.debug('Updating file: fp: %s, fname: %s, fid_full_url: %s' % (fp, fname, fid_full_url))
-            return self.save_file_to_weed(fp, fid_full_url, fname)
+            LOGGER.debug('Updating file: fp: %s, fname: %s, fid_full_url: %s' % (fp, fname, fid_full_url))
+            return WeedOperation.save_file_to_weed(fp, fid_full_url, fname)
         except Exception as e:
             err_msg = 'Could not Updating file: fp: %s, fname: %s, fid_full_url: %s, e: %s' % (fp, fname, fid_full_url, e)
-            print(err_msg)
-            logger.error(err_msg)
+            LOGGER.error(err_msg)
             return None
 
 
@@ -460,14 +487,14 @@ class WeedOperation(object):
         fid_full_url = 'wrong_url'
         try:
             fid_full_url = self.get_fid_full_url(fid)
-            logger.debug('Deleting file: fid: %s, fname: %s, fid_full_url: %s' % (fid, fname, fid_full_url))
+            LOGGER.debug('Deleting file: fid: %s, fname: %s, fid_full_url: %s' % (fid, fname, fid_full_url))
 
             r = requests.delete(fid_full_url)
             if r.json().has_key('size'):
                 return True
         except Exception as e:
             err_msg = 'Deleting file: fid: %s, fname: %s, fid_full_url: %s, e: %s' % (fid, fname, fid_full_url, e)
-            logger.error(err_msg)
+            LOGGER.error(err_msg)
             return False
         return False
     ## -----------------------------------------------------------
@@ -491,7 +518,7 @@ class WeedOperation(object):
         #         fname.append(fname + seq)
 
         #     for (i, w) in sequence(waks):
-        #         return self.save_file_to_weed(fp, waks[i], fnames[i])
+        #         return WeedOperation.save_file_to_weed(fp, waks[i], fnames[i])
 
         pass
 
@@ -503,12 +530,11 @@ class WeedOperation(object):
         try:
             src_file_rsp = self.read(src_fid, fname=src_fname, just_url=False)
             fp = StringIO.StringIO(src_file_rsp.content)
-            logger.debug('Updating file: dst_fid: %s, src_fid: %s, src_fname: %s,  fp: %s' % (dst_fid, src_fid, src_fname, fp))
+            LOGGER.debug('Updating file: dst_fid: %s, src_fid: %s, src_fname: %s,  fp: %s' % (dst_fid, src_fid, src_fname, fp))
             return self.update(fp, dst_fid, src_fname)
         except Exception as e:
             err_msg = 'Could not Updating file: dst_fid: %s, src_fid: %s, src_fname: %s. e: %s' % (dst_fid, src_fid, src_fname, e)
-            print(err_msg)
-            logger.error(err_msg)
+            LOGGER.error(err_msg)
             return None
 
 
