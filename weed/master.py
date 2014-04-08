@@ -30,16 +30,19 @@ python interface of weed-fs.
 
 '''
 
+from urlparse import urljoin, urlunparse, ParseResult
 
-__all__ = ['WeedMaster', 'WeedVolume']
-
+__all__ = ['WeedMaster']
 
 import json
+import logging
 import requests
+
+from .volume import WeedVolume
 
 class WeedMaster(object):
     """
-      Weed-FS's master server(relative to volume-server)
+    Weed-FS's master server (relative to volume-server)
     """
 
     def __init__(self, host='127.0.0.1', port=9333):
@@ -51,12 +54,13 @@ class WeedMaster(object):
         """
         self.host = host
         self.port = port
-        self.url_base = 'http://' + self.host + ':' + str(self.port)
-        self.url_assign = self.url_base + '/dir/assign'
-        self.url_lookup = self.url_base + '/dir/lookup'
-        self.url_vacuum = self.url_base + '/vol/vacuum'
-        self.url_status = self.url_base + '/dir/status'
-
+        self.url_base_parts = ParseResult(scheme='http', netloc='%s:%d' % (host, port),
+            path='', params='', query='', fragment='')
+        self.url_base = urlunparse(self.url_base_parts)
+        self.url_assign = urljoin(self.url_base, '/dir/assign')
+        self.url_lookup = urljoin(self.url_base, '/dir/lookup')
+        self.url_vacuum = urljoin(self.url_base, '/vol/vacuum')
+        self.url_status = urljoin(self.url_base, '/dir/status')
 
     def get_assign_key(self):
         """
@@ -69,15 +73,14 @@ class WeedMaster(object):
         Arguments:
         - `self`:
         """
-        result = None
         try:
             r = requests.get(self.url_assign)
             result = json.loads(r.content)
         except Exception as e:
-            print('Could not get status of this volume: %s. Exception is: %s' % (self.url_status, e))
+            logging.warning("Could not get status of this volume: %s. "
+                "Exception is: %s" % (self.url_status, e))
             result = None
         return result
-
 
     def lookup(self, volume_id):
         """
@@ -97,21 +100,36 @@ class WeedMaster(object):
         Arguments:
         - `self`:
         """
-        result = None
         try:
             r = requests.get(self.url_lookup + '?volumeId=%s' % volume_id)
             result = json.loads(r.content)
         except Exception as e:
-            print('Could not get status of this volume: %s. Exception is: %s' % (self.url_status, e))
+            logging.warning("Could not get status of this volume: %s. "
+                "Exception is: %s" % (self.url_status, e))
             result = None
         return result
 
+    def get_volume(self, fid):
+        lookup_dict = self.lookup(fid)
+        if 'locations' in lookup_dict:
+            locations_list = lookup_dict['locations']
+        else:
+            return None
+
+        url_parts = ParseResult(scheme='http', netloc=locations_list[0]['publicUrl'],
+            path='', params='', query='', fragment='')
+        volume = WeedVolume(host=url_parts.hostname, port=url_parts.port)
+        return volume
 
     def vacuum(self):
         """
         Force Garbage Collection
 
-        If your system has many deletions, the deleted file's disk space will not be synchronously re-claimed. There is a background job to check volume disk usage. If empty space is more than the threshold, default to 0.3, the vacuum job will make the volume readonly, create a new volume with only existing files, and switch on the new volume. If you are impatient or doing some testing, vacuum the unused spaces this way.
+        If your system has many deletions, the deleted file's disk space will not be synchronously
+        re-claimed. There is a background job to check volume disk usage. If empty space is more
+        than the threshold, default to 0.3, the vacuum job will make the volume readonly, create a
+        new volume with only existing files, and switch on the new volume. If you are impatient or
+        doing some testing, vacuum the unused spaces this way.
 
         > curl "http://localhost:9333/vol/vacuum"
         > curl "http://localhost:9333/vol/vacuum?garbageThreshold=0.4"
@@ -174,15 +192,14 @@ class WeedMaster(object):
         Arguments:
         - `self`:
         """
-        result = None
         try:
             r = requests.get(self.url_vacuum)
             result = json.loads(r.content)
         except Exception as e:
-            print('Could not get status of this volume: %s. Exception is: %s' % (self.url_status, e))
+            logging.warning("Could not get status of this volume: %s. "
+                "Exception is: %s" % (self.url_status, e))
             result = None
         return result
-
 
     def get_status(self):
         """
@@ -191,54 +208,14 @@ class WeedMaster(object):
         Arguments:
         - `self`:
         """
-        result = None
         try:
             r = requests.get(self.url_status)
             result = json.loads(r.content)
         except Exception as e:
-            print('Could not get status of this volume: %s. Exception is: %s' % (self.url_status, e))
+            logging.warning("Could not get status of this volume: %s. "
+                "Exception is: %s" % (self.url_status, e))
             result = None
         return result
 
-
     def __repr__(self):
-        return '<WeedMaster: %s:%s>' % (self.host, self.port)
-
-
-class WeedVolume(object):
-    """
-      Weed-FS's volume server(relative to master-server)
-    """
-
-    def __init__(self, host='127.0.0.1', port=8080):
-        """
-
-        Arguments:
-        - `host`:
-        - `port`:
-        """
-        self.host = host
-        self.port = port
-        self.url_base = 'http://' + self.host + ':' + str(self.port)
-        self.url_status = self.url_base + '/status'
-
-
-    def get_status(self):
-        """
-        get status of this volume
-
-        Arguments:
-        - `self`:
-        """
-        r = requests.get(self.url_status)
-        try:
-            result = json.loads(r.content)
-        except Exception as e:
-            print('Could not get status of this volume: %s. Exception is: %s' % (self.url_status, e))
-            result = None
-        return result
-
-
-    def __repr__(self):
-        return '<WeedVolume: %s:%s>' % (self.host, self.port)
-
+        return "<WeedMaster: %s:%s>" % (self.host, self.port)

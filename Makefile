@@ -1,4 +1,4 @@
-files = weed/__init__.py weed/weed.py weed/test_weed.py
+files = weed/__init__.py weed/master.py weed/volume.py weed/test_weed.py
 file_pytest_genscript = weed/test_weed_pytest.py
 
 default: test
