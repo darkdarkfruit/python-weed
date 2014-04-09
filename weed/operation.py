@@ -250,7 +250,7 @@ class WeedOperation(object):
         pass
 
 
-    def cp(self, src_fid, dst_fid, src_fname='', dst_fname='',):
+    def cp(self, src_fid, dst_fid, src_fname=''):
         """ cp src_fid dst_fid
 
         replace file@dst_fid with file@src_fid

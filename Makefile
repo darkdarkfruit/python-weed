@@ -1,4 +1,4 @@
-files = weed/conf.py weed/__init__.py weed/master.py weed/operation.py weed/_test_weed_pytest.py weed/util.py weed/version.py weed/volume.py weed/weed.py
+files = weed/conf.py weed/__init__.py weed/master.py weed/operation.py weed/_test_weed_pytest.py weed/util.py weed/version.py weed/volume.py
 file_pytest_genscript = weed/_test_weed_pytest.py
 
 default: test
@@ -40,5 +40,5 @@ git_push:
 
 
 # git push with tags
-git_push_tags
+git_push_tags:
 	git push --tags

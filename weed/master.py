@@ -44,8 +44,6 @@ __all__ = ['WeedMaster']
 
 
 import json
-import random
-import StringIO
 import urlparse
 import requests
 from conf import LOGGER
@@ -164,13 +162,14 @@ class WeedMaster(object):
             r = requests.get(self.url_lookup + '?volumeId=%s' % volume_id)
             result = json.loads(r.content)
         except Exception as e:
-            logging.error("Could not get status of this volume: %s. "
+            LOGGER.error("Could not get status of this volume: %s. "
                 "Exception is: %s" % (self.url_status, e))
             result = None
         return result
 
 
     def get_volume(self, fid):
+        ''' get an instance of WeedVolume by @fid'''
         lookup_dict = self.lookup(fid)
         if 'locations' in lookup_dict:
             locations_list = lookup_dict['locations']
@@ -258,7 +257,7 @@ class WeedMaster(object):
             r = requests.get(self.url_vacuum)
             result = json.loads(r.content)
         except Exception as e:
-            logging.error("Could not get status of this volume: %s. "
+            LOGGER.error("Could not get status of this volume: %s. "
                 "Exception is: %s" % (self.url_status, e))
             result = None
         return result
@@ -282,186 +281,3 @@ class WeedMaster(object):
     def __repr__(self):
         return '<WeedMaster: %s:%s>' % (self.host, self.port)
 
-
-
-# class WeedOperation(object):
-#     """
-#     do CRUD operations to weed-fs.
-#     Currently, implement it with /* tornado and */ requests. Maybe mongrel2 + brubeck is better?
-
-#     """
-
-#     def __init__(self, master_host='127.0.0.1', master_port='9333'):
-#         self.master = WeedMaster(master_host, master_port)
-
-
-#     def get_fid_full_url(self, fid):
-#         """
-#         get operatable full_url by fid.
-#         lookup info returns:
-#         -----------
-#         {
-#           "locations": [
-#             {
-#               "publicUrl": "localhost:8080",
-#               "url": "localhost:8080"
-#             }
-#           ]
-#         }
-#         -----------
-
-#         return something like: 'http://127.0.0.1:8080/3,0230203913'
-#         """
-#         result = None
-#         volume_id = fid.split(',')[0]
-#         full_url = ''
-#         try:
-#             r = self.master.lookup(volume_id)
-#             # _url = WEEDFS_MASTER_URL + '/dir/lookup?volumeId=%s' % volume_id
-#             # LOGGER.debug('lookup volume by url: %s' % _url)
-#             # r = requests.get(_url)
-#             result = json.loads(r.content)
-#             locations = result['locations']
-
-#             # choose a random location
-#             location = locations[random.randint(0, len(locations) - 1)]
-#             full_url = 'http://%s/%s' % (location['url'], fid)
-#         except Exception as e:
-#             LOGGER.error('Could not get volume location of this fid: %s. Exception is: %s' % (fid, e))
-#             result = None
-#         return full_url
-
-
-#     @staticmethod
-#     def save_file_to_weed(self, fp, fid_full_url, fname=''):
-#         """
-#         save fp(file-pointer, file-description) to remote weed
-#         """
-#         tmp_uploading_file_name = fname or 'a.unknown'
-#         rsp = requests.post(fid_full_url, files={'file' : (tmp_uploading_file_name, fp)})
-#         # LOGGER.debug(rsp.request.headers)
-#         if not rsp.json().has_key('size'): # post new file fails
-#             err_msg = 'Could not save file on weed-fs with fid_full_url: %s' % (fid_full_url)
-#             LOGGER.error(err_msg)
-#             return (False, err_msg)
-#         data = {
-#             'fid_full_url' : fid_full_url,
-#             'fname' : fname,
-#             'storage_size' : rsp.json().get('size', 0),
-#             }
-#         return (True, data)
-
-
-#     ## -----------------------------------------------------------
-#     ##    weedfs operation: CRUD starts
-#     ## -----------------------------------------------------------
-#     def create(self, fp, fname=''):
-#         """
-#         create a file in weed-fs with @fid
-#         """
-#         fid_full_url = 'wrong_url'
-#         try:
-#             wak = self.master.acquire_new_assign_key()
-#             LOGGER.debug('Creating file: fp: %s, fname: %s, fid_full_url: %s'
-#                          % (fp, fname, fid_full_url))
-#             return WeedOperation.save_file_to_weed(fp, wak.fid_full_url, fname)
-#         except Exception as e:
-#             err_msg = 'Could not create file: fp: %s, fname: %s, fid_full_url: %s, e: %s' % (fp, fname, fid_full_url, e)
-#             LOGGER.error(err_msg)
-#             return None
-
-
-#     def read(self, fid, fname='', just_url=True):
-#         """
-#         read/get a file from weed-fs with @fid.
-
-#         @just_url:
-#           True -> just return fid_full_url (web-servers/browsers like nginx, chrome can get resource by this url)
-#           False -> return a http response of requests(package requests).
-#         """
-#         fid_full_url = 'wrong_url'
-#         try:
-#             fid_full_url = self.get_fid_full_url(fid)
-#             LOGGER.debug('Reading file(just_url:%s): fid: %s, fname: %s, fid_full_url: %s' % (just_url, fid, fname, fid_full_url))
-#             if just_url:
-#                 return fid_full_url
-#             else:
-#                 rsp = requests.get(fid_full_url)
-#                 return rsp
-#         except Exception as e:
-#             err_msg = 'Could not read file(just_url:%s): fid: %s, fname: %s, fid_full_url: %s, e: %s' % (just_url, fid, fname, fid_full_url, e)
-#             LOGGER.error(err_msg)
-#             return None
-
-
-#     def update(self, fp, fid, fname=''):
-#         """
-#         update a file in weed-fs with @fid
-#         """
-#         fid_full_url = 'wrong_url'
-#         try:
-#             fid_full_url = self.get_fid_full_url(fid)
-#             LOGGER.debug('Updating file: fp: %s, fname: %s, fid_full_url: %s' % (fp, fname, fid_full_url))
-#             return WeedOperation.save_file_to_weed(fp, fid_full_url, fname)
-#         except Exception as e:
-#             err_msg = 'Could not Updating file: fp: %s, fname: %s, fid_full_url: %s, e: %s' % (fp, fname, fid_full_url, e)
-#             LOGGER.error(err_msg)
-#             return None
-
-
-#     def delete(self, fid, fname=''):
-#         """
-#         delete a file in weed-fs with @fid
-#         """
-#         fid_full_url = 'wrong_url'
-#         try:
-#             fid_full_url = self.get_fid_full_url(fid)
-#             LOGGER.debug('Deleting file: fid: %s, fname: %s, fid_full_url: %s' % (fid, fname, fid_full_url))
-
-#             r = requests.delete(fid_full_url)
-#             if r.json().has_key('size'):
-#                 return True
-#         except Exception as e:
-#             err_msg = 'Deleting file: fid: %s, fname: %s, fid_full_url: %s, e: %s' % (fid, fname, fid_full_url, e)
-#             LOGGER.error(err_msg)
-#             return False
-#         return False
-#     ## -----------------------------------------------------------
-#     ##    weedfs operation: CRUD ends
-#     ## -----------------------------------------------------------
-
-
-#     def create_multiple(self, fp_array):
-#         ''' create/save multiple files '''
-#         # try:
-#         #     wak = self.master.acquire_new_assign_key(count)
-#         #     waks.append(wak)
-#         #     fnames.append(fname)
-#         #     for i in range(count - 1):
-#         #         _w = {}
-#         #         _w.update(wak)
-#         #         seq = '_%d' % (i + 1)
-#         #         _w.update({'fid' : wak.fid + seq})
-#         #         _w.update_full_urls()
-#         #         waks.append(_w)
-#         #         fname.append(fname + seq)
-
-#         #     for (i, w) in sequence(waks):
-#         #         return WeedOperation.save_file_to_weed(fp, waks[i], fnames[i])
-
-#         pass
-
-
-#     def update_by_fid(self, dst_fid, src_fid, src_fname=''):
-#         """
-#         replace file@dst_fid with file@src_fid
-#         """
-#         try:
-#             src_file_rsp = self.read(src_fid, fname=src_fname, just_url=False)
-#             fp = StringIO.StringIO(src_file_rsp.content)
-#             LOGGER.debug('Updating file: dst_fid: %s, src_fid: %s, src_fname: %s,  fp: %s' % (dst_fid, src_fid, src_fname, fp))
-#             return self.update(fp, dst_fid, src_fname)
-#         except Exception as e:
-#             err_msg = 'Could not Updating file: dst_fid: %s, src_fid: %s, src_fname: %s. e: %s' % (dst_fid, src_fid, src_fname, e)
-#             LOGGER.error(err_msg)
-#             return None

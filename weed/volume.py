@@ -36,8 +36,6 @@ from urlparse import urljoin, urlunparse, ParseResult
 __all__ = ['WeedVolume']
 
 import json
-import logging
-import os
 import requests
 
 from conf import LOGGER
@@ -80,7 +78,7 @@ class WeedVolume(object):
         return result
 
 
-    def put_file(self, absolute_file_path, fid, headers={}):
+    def put_file(self, absolute_file_path, fid, headers=None):
         ''' you can put exact http-headers in @headers to help weed to clarify putting file.
 
         eg:
@@ -89,14 +87,17 @@ class WeedVolume(object):
            @headers = {'content-type' : 'text/xml'} or
            @headers = {'content-type' : 'application/json'}
 
+        Deprecated.
+
+        Use util.put_file instead.
         '''
         url = urljoin(self.url_base, fid)
-        if headers:
+        if headers and isinstance(headers, dict):
             files = {'file': (open(absolute_file_path, 'rb')), 'headers' : headers}
         else:
             files = {'file': (open(absolute_file_path, 'rb'))}
         try:
-            r = requests.post(url, files=files);
+            r = requests.post(url, files=files)
         except Exception as e:
             LOGGER.error("Could not post file. Exception is: %s" % e)
             return None
@@ -113,9 +114,15 @@ class WeedVolume(object):
 
 
     def get_file(self, fid):
+        ''' Get a file's content by @fid
+
+        Deprecated.
+
+        Use WeedOperation().get instead.
+        '''
         url = urljoin(self.url_base, fid)
         try:
-            r = requests.get(url);
+            r = requests.get(url)
         except Exception as e:
             LOGGER.error("Could not get file. Exception is: %s" % e)
 
@@ -128,9 +135,15 @@ class WeedVolume(object):
             return None
 
     def delete_file(self, fid):
+        ''' Delete a file by @fid
+
+        Deprecated.
+
+        Use WeedOperation().delete instead.
+        '''
         url = urljoin(self.url_base, fid)
         try:
-            r = requests.delete(url);
+            r = requests.delete(url)
         except Exception as e:
             LOGGER.error("Could not delete file. Exception is: %s" % e)
 
