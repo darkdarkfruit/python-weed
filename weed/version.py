@@ -27,7 +27,7 @@
 '''
 show and set version of python-weed
 '''
-VERSION = (0, 1, 1)
+VERSION = (0, 1, 2)
 
 def get_version():
     ''' return python-weed's version '''
