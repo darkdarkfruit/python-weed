@@ -1,7 +1,5 @@
-from master import WeedMaster
-from volume import WeedVolume
 from .version import VERSION, __version__
 
-__all__ = ['WeedMaster', 'WeedVolume']
+import conf, util, master, volume
 
 __author__ = 'darkdarkfruit'
