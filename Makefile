@@ -30,4 +30,4 @@ sdist: ${files} test_python_setup
 
 # upload to pypi
 upload: sdist
-	python setup.py upload
+	python setup.py bdist upload
