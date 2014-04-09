@@ -27,7 +27,7 @@ configuration of python-weed
 '''
 
 import logging
-LOGGER = logging.getLogger()
+LOGGER = logging.getLogger("python-weed")
 # LOGGER = logging
 LOGGER.setLevel(logging.DEBUG)
 
