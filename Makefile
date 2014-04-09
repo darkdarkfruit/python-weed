@@ -26,3 +26,8 @@ stest:
 # make a source distribution in dist/
 sdist: ${files} test_python_setup
 	python setup.py sdist
+
+
+# upload to pypi
+upload: sdist
+	python setup.py upload
