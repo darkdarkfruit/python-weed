@@ -34,8 +34,9 @@ upload: sdist
 
 
 # git push to github
+# do `git remote add origin https://github.com/darkdarkfruit/python-weed.git` first
 git_push:
-	git push https://github.com/darkdarkfruit/python-weed.git
+	git push 
 
 
 # git push with tags
