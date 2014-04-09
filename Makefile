@@ -36,3 +36,8 @@ upload: sdist
 # git push to github
 git_push:
 	git push https://github.com/darkdarkfruit/python-weed.git
+
+
+# git push with tags
+git_push_tags
+	git push --tags
