@@ -31,3 +31,8 @@ sdist: ${files} test_python_setup
 # upload to pypi
 upload: sdist
 	python setup.py sdist upload
+
+
+# git push to github
+git_push:
+	git push https://github.com/darkdarkfruit/python-weed.git
