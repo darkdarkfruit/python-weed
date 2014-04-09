@@ -28,8 +28,17 @@ configuration of python-weed
 
 import logging
 LOGGER = logging.getLogger("python-weed")
-# LOGGER = logging
-LOGGER.setLevel(logging.DEBUG)
+
+def set_logger_level(logger, logging_level=logging.DEBUG):
+    ''' set logger level '''
+    logger.setLevel(logging_level)
+
+# for production mode, you might set it to logging.WARNNING
+#set_logger_level(LOGGER, logging.WARNING)
+set_logger_level(LOGGER, logging.DEBUG)
+
+
+
 
 ## if we have tornado installed, we can use its pritty-print log
 try:
@@ -38,3 +47,9 @@ try:
 except:
     pass
 
+
+## caches volume_id to speed up lookup performance since volume_id will not change frequently
+##  default is 60 seconds
+VOLUME_CACHE_DURATION_IN_SECONDS = 60
+def set_volume_cache_duration_in_seconds(seconds):
+    VOLUME_CACHE_DURATION_IN_SECONDS = seconds

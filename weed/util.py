@@ -102,6 +102,8 @@ class WeedOperationResponse(dict):
         self['storage_size'] = 0
         self['fid_full_url'] = ''
         self['fname'] = ''
+
+        ## http://stackoverflow.com/questions/4984647/accessing-dict-keys-like-an-attribute-in-python
         self.__dict__ = self
         # for k, v in self.items():
         #     setattr(self, k, v)

@@ -42,7 +42,7 @@ from urlparse import urljoin, urlunparse, ParseResult
 __all__ = ['WeedMaster']
 
 
-
+import time
 import json
 import urlparse
 import requests
@@ -73,6 +73,9 @@ class WeedMaster(object):
         self.url_lookup = urljoin(self.url_base, '/dir/lookup')
         self.url_vacuum = urljoin(self.url_base, '/vol/vacuum')
         self.url_status = urljoin(self.url_base, '/dir/status')
+
+        # volumes usually do not move, so we cache it here for 1 minute.
+        self.volumes_cache = {}
 
 
     def acquire_assign_info(self):
@@ -139,10 +142,10 @@ class WeedMaster(object):
         return wak
 
 
-    def lookup(self, volume_id):
+    def lookup(self, volume_id_or_fid, cache_duration_in_seconds=60):
         """
-        lookup the urls of a volume
-        return a dict like below if successful else None:
+        lookup the locations of a volume@volume_id_or_fid.
+        returns a dict like below if successful else None:
         -----------
         {
           "locations": [
@@ -157,10 +160,20 @@ class WeedMaster(object):
         Arguments:
         - `self`:
         """
+        _volume_id = volume_id_or_fid.split(',')[0]
         result = None
         try:
-            r = requests.get(self.url_lookup + '?volumeId=%s' % volume_id)
-            result = json.loads(r.content)
+            ## try cache first
+            if self.volumes_cache.has_key(_volume_id) and (time.time() - self.volumes_cache[_volume_id][1]) <= cache_duration_in_seconds:
+                LOGGER.debug('volume_cache(lookup by volume_id) hits')
+                return self.volumes_cache[_volume_id][0]
+            else:
+                r = requests.get(self.url_lookup + '?volumeId=%s' % _volume_id)
+                result = json.loads(r.content)
+
+                ## refresh cache
+                self.volumes_cache.update({_volume_id : (result, time.time())})
+
         except Exception as e:
             LOGGER.error("Could not get status of this volume: %s. "
                 "Exception is: %s" % (self.url_status, e))
