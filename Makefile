@@ -33,6 +33,10 @@ upload: sdist
 	python setup.py sdist upload
 
 
+install : test
+	python setup.py install
+
+
 # git push to github
 # do `git remote add origin https://github.com/darkdarkfruit/python-weed.git` first
 git_push:

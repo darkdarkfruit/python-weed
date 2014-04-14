@@ -176,6 +176,26 @@ def test_volume_put_get_delete_file():
     assert 'size' in delete_result
 
 
+def test_accquire_new_fid():
+    op = WeedOperation()
+    fids = op.acquire_new_fids()
+    assert isinstance(fids, (tuple, list))
+    assert ',' in fids[0]
+    count = 5
+    fids = op.acquire_new_fids(count)
+    for i in range(count):
+        assert ',' in fids[i]
+
+
+def test_put_a_file_with_fid():
+    op = WeedOperation()
+    fid = op.acquire_new_fids()[0]
+    fname = 'test_opensource_logo.jpg'
+    fpath = os.path.join(TEST_PATH, fname)
+    assert op.put(open(fpath, 'r'), fid, fname)
+
+
+
 def test_put_file():
     # test put_file in weed.util
     op = WeedOperation()
@@ -219,6 +239,7 @@ def test_file_operations():
         assert rsp
         assert rsp.has_key('fid')
         fid = rsp['fid']
+        assert os.path.split(op.get_fid_full_url(fid))[1] == fid
         assert rsp['fid'].replace(',', '') > '01'
         assert rsp['fid_full_url']
         assert rsp['storage_size'] > 0
