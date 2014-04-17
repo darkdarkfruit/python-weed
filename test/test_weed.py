@@ -42,6 +42,7 @@ note:
 import os
 import sys
 import urlparse
+import StringIO
 
 TEST_PATH = os.path.split(__file__)[0]
 WEED_PATH = os.path.split(TEST_PATH)[0]
@@ -55,7 +56,7 @@ from weed.util import *
 from weed.master import *
 from weed.volume import *
 from weed.operation import *
-
+from weed.filer import WeedFiler
 
 WEED_MASTER_IP = '127.0.0.1'
 WEED_MASTER_PORT = 9333
@@ -91,6 +92,30 @@ def test_WeedMaster():
     status_dict = master.get_status()
     assert isinstance(status_dict, dict)
     assert status_dict.has_key('Topology')
+
+
+def test_WeedMaster2():
+    master = WeedMaster()
+    assert master.__repr__()
+
+    # assign
+    wak = master.acquire_new_assign_key(10)
+    assert isinstance(wak, dict)
+    assert wak.has_key('fid')
+
+    fid = wak.fid
+
+    fids = [fid] + [fid + '_' + str(i + 1) for i in range(10)]
+    locations = []
+    for i in fids:
+        l = master.lookup(i)
+        assert l.has_key('locations')
+        locations.append(l)
+
+    for i, l in enumerate(locations):
+        if i < (len(locations) - 1):
+            assert locations[i] == locations[i + 1]
+
 
 
 def test_WeedVolume():
@@ -270,6 +295,32 @@ def test_file_operations():
     assert rsp.storage_size > 0
     rsp = op.delete('3,20323023') # delete an unexisted file, should return False
     assert rsp.storage_size == 0
+
+
+def test_WeedFiler():
+    wf = WeedFiler()
+    assert wf.host == '127.0.0.1'
+    assert wf.port == 27100
+    assert wf.uri == '127.0.0.1:27100'
+    assert wf.url == 'http://127.0.0.1:27100'
+
+    d = '/test/'
+    new_d = '/test/new_dir/'
+    assert wf.put(StringIO.StringIO('hello, how are you'), d + 'test.txt') == d + 'test.txt'
+    assert wf.mkdir(new_d)
+    f = StringIO.StringIO('hello, how are you?')
+    assert wf.put(f, os.path.join(new_d, 'hello.txt')) == os.path.join(new_d, 'hello.txt')
+    j = wf.list(new_d)
+    assert isinstance(j, dict)
+    assert j.has_key('Directory')
+    assert j['Directory'] == '/test/new_dir/'
+    assert j['Files']
+    files = j['Files']
+    fnames = []
+    for f in files:
+        fnames.append(f['Name'])
+    assert 'hello.txt' in fnames
+
 
 
 if __name__ == '__main__':
