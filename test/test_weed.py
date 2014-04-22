@@ -244,7 +244,7 @@ def test_put_file():
         assert rsp['storage_size'] > 0
 
     # read
-    content = op.read(fid, fname, just_url=False).content
+    content = op.read(fid, fname, just_url=False)
     with open(fpath) as _:
         original_content = _.read()
     assert content == original_content
@@ -270,7 +270,9 @@ def test_file_operations():
         assert rsp['storage_size'] > 0
 
     # read
-    content = op.read(fid, fname, just_url=False).content
+    content = op.read(fid, fname, just_url=False, just_content=False).content
+    content2 = op.read(fid, fname, just_url=False, just_content=True)
+    assert content == content2
     with open(fpath) as _:
         original_content = _.read()
     assert content == original_content

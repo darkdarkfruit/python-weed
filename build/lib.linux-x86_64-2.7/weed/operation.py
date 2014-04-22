@@ -84,7 +84,7 @@ class WeedOperation(object):
         if count == 1:
             return [fid]
         else:
-            fids = [fid] + [fid + ('_%d' % i) for i in range(count)]
+            fids = [fid] + [fid + ('_%d' % (i + 1)) for i in range(count)]
             return fids
 
 
@@ -141,7 +141,6 @@ class WeedOperation(object):
         return a WeedOperationResponse instance
         """
         LOGGER.info('|--> Putting file@fid:%s, fname:%s' % (fid, fname) )
-
         fid_full_url = 'wrong_url'
         _fid = fid
         try:

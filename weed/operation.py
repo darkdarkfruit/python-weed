@@ -170,13 +170,17 @@ class WeedOperation(object):
             return None
 
 
-    def get(self, fid, fname='', just_url=True):
+    def get(self, fid, fname='', just_url=False, just_content=True):
         """
         read/get a file from weed-fs with @fid.
 
-        @just_url:
-          True -> just return fid_full_url (web-servers/browsers like nginx, chrome can get resource by this url)
-          False -> return a http response of requests(package requests).
+        @just_url(default is False):
+          if True -> just return an object of WeedOperationResponse(web-servers/browsers like nginx, chrome can get resource by this url( WeedOperationResponse.fid_full_url ))
+          if False -> return a http response of requests(package requests) if @just_content is False else return file_content
+
+        @just_content(default is True):
+          if True -> just return the file's content
+          if False -> return a response of requests.Respond object. (eg: You can get content_type of the file being get)
 
         return a WeedOperationResponse instance
         """
@@ -195,7 +199,10 @@ class WeedOperation(object):
                 return _r
             else:
                 rsp = requests.get(fid_full_url)
-                return rsp
+                if just_content:
+                    return rsp.content
+                else:
+                    return rsp
         except Exception as e:
             err_msg = 'Could not read file(just_url:%s): fid: %s, fname: %s, fid_full_url: %s, e: %s' % (just_url, fid, fname, fid_full_url, e)
             LOGGER.error(err_msg)
@@ -234,7 +241,7 @@ class WeedOperation(object):
 
 
     def create(self, fp, fname=''):
-        """
+        """  CREATE of CRUD(C)
         create a file in weed-fs with @fid
 
         return a WeedOperationResponse instance
@@ -243,22 +250,16 @@ class WeedOperation(object):
         return self.put(fp, None, fname=fname)
 
 
-    def read(self, fid, fname='', just_url=True):
-        """
-        read/get a file from weed-fs with @fid.
-
-        @just_url:
-          True -> just return fid_full_url (web-servers/browsers like nginx, chrome can get resource by this url)
-          False -> return a http response of requests(package requests).
-
-        return a WeedOperationResponse instance
+    def read(self, fid, fname='', just_url=False, just_content=True):
+        """  READ of CRUD(R)
+        Alias to get method.(Alias here to supply full CRUD)
         """
         LOGGER.debug('--> Trying to read a file. fid: %s, fname:%s, just_url: %s' % (fid, fname, just_url) )
-        return self.get(fid, fname=fname, just_url=just_url)
+        return self.get(fid, fname=fname, just_url=just_url, just_content=just_content)
 
 
     def update(self, fp, fid, fname=''):
-        """
+        """ UPDATE of CRUD(U)
         update a file in weed-fs with @fid
 
         return a WeedOperationResponse instance
@@ -269,7 +270,7 @@ class WeedOperation(object):
 
 
     def delete(self, fid, fname=''):
-        """
+        """ DELETE of CRUD(D)
         delete a file in weed-fs with @fid. return a integer representing the file storage in weedfs.
 
         return a WeedOperationResponse instance

@@ -24,7 +24,7 @@ stest:
 
 
 # make a source distribution in dist/
-sdist: ${files} test_python_setup
+sdist: ${files} test
 	python setup.py sdist
 
 
