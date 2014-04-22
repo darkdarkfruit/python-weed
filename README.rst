@@ -48,8 +48,8 @@ Usage (sample)
 
 ::
 
-    In [1]: from weed import *
-
+    In [1]: from weed.master import WeedMaster
+    
     In [2]: master = WeedMaster()
 
     In [3]: master
