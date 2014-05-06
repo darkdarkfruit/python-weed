@@ -126,7 +126,7 @@ class WeedOperation(object):
     ## -----------------------------------------------------------
     ##    weedfs operation: get/put/delete, and CRUD-aliases starts
     ## -----------------------------------------------------------
-    def get(self, fid, fname='', just_url=False, just_content=True):
+    def get(self, fid, fname=''):
         """
         read/get a file from weed-fs with @fid.
 
@@ -140,13 +140,13 @@ class WeedOperation(object):
 
         return a WeedOperationResponse instance
         """
-        LOGGER.debug('|--> Getting file. fid: %s, fname:%s, just_url: %s' % (fid, fname, just_url))
+        LOGGER.debug('|--> Getting file. fid: %s, fname:%s' % (fid, fname))
 
         fid_full_url = 'wrong_url'
         wor = WeedOperationResponse()
         try:
             fid_full_url = self.get_fid_full_url(fid)
-            LOGGER.debug('Reading file(just_url:%s): fid: %s, fname: %s, fid_full_url: %s' % (just_url, fid, fname, fid_full_url))
+            LOGGER.debug('Reading file fid: %s, fname: %s, fid_full_url: %s' % (fid, fname, fid_full_url))
             rsp = self.get_http_response(fid_full_url)
             wor.status = 'success'
             wor.fid = fid
@@ -155,7 +155,7 @@ class WeedOperation(object):
             wor.content = rsp.content
             wor.content_type = rsp.headers.get('content-type')
         except Exception as e:
-            err_msg = 'Could not read file(just_url:%s): fid: %s, fname: %s, fid_full_url: %s, e: %s' % (just_url, fid, fname, fid_full_url, e)
+            err_msg = 'Could not read file fid: %s, fname: %s, fid_full_url: %s, e: %s' % (fid, fname, fid_full_url, e)
             LOGGER.error(err_msg)
             wor.status = 'fail'
             wor.message = err_msg
@@ -213,9 +213,11 @@ class WeedOperation(object):
 
         wor = WeedOperationResponse()
         try:
+            _fp = open(fp, 'r') if isinstance(fp, str) else fp
+
             LOGGER.info('Putting file with fid: %s, fid_full_url:%s for file: fp: %s, fname: %s'
                          % (_fid, fid_full_url, fp, fname))
-            wor = put_file(fp, fid_full_url, fname)
+            wor = put_file(_fp, fid_full_url, fname)
             LOGGER.info('%s' % wor)
             wor.fid = _fid
         except Exception as e:
@@ -223,6 +225,14 @@ class WeedOperation(object):
             LOGGER.error(err_msg)
             wor.status = 'fail'
             wor.message = err_msg
+
+        # close fp if parameter fp is a str
+        if isinstance(fp, str):
+            try:
+                _fp.close()
+            except Exception as e:
+                LOGGER.warning('Could not close fp: %s. e: %s' % (_fp, e))
+
         return wor
 
 

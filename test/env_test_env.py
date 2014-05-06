@@ -1,7 +1,7 @@
 # ** -- coding: utf-8 -- **
 #!/usr/bin/env python
 #
-#Copyright (c) 2011 darkdarkfruit <darkdarkfruit@gmail.com>
+#Copyright (c) darkdarkfruit <darkdarkfruit@gmail.com>
 #
 #Permission is hereby granted, free of charge, to any person obtaining a copy
 #of this software and associated documentation files (the "Software"), to deal
@@ -22,18 +22,16 @@
 #THE SOFTWARE.
 #
 
+''' test env setting '''
 
+import os
+import sys
+import urlparse
+import StringIO
+import logging
 
-'''
-show and set version of python-weed
-'''
-VERSION = (0, 1, 6)
+TEST_PATH = os.path.split(__file__)[0]
+WEED_PATH = os.path.split(TEST_PATH)[0]
+if WEED_PATH not in sys.path:
+    sys.path.insert(0, WEED_PATH)
 
-def get_version():
-    ''' return python-weed's version '''
-    version = '%s.%s' % (VERSION[0], VERSION[1])
-    if VERSION[2]:
-        version = '%s.%s' % (version, VERSION[2])
-    return version
-
-__version__ = get_version()

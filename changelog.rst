@@ -1,3 +1,13 @@
+
+version 0.1.6 released @Tue May  6 01:35:38 UTC 2014
+=====================================================
+changelog:
+v_0.1.6 released. fix minor errors on operation and filer. 
+
+    add examples to README
+    bump version to v_0.1.6
+
+
 version 0.1.5 released @Tue May  6 01:35:38 UTC 2014
 =====================================================
 changelog:

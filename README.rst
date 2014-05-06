@@ -150,3 +150,74 @@ Usage (sample)
        u'RepType': u'000',
        u'Size': 0,
        u'Version': 2}]}
+
+
+:: 
+    #----------------------------------------------------------- 
+    from weed import operation
+    wo = operation.WeedOperation()
+    
+    # put
+    wor = wo.put('1.txt')
+    print(wor)
+    
+    # get
+    wor = wo.get(wor.fid)
+    def omit_printing_content(d):
+        for k,v in d.items():
+            _v = v
+            if k == 'content' and v and len(v) > 10:
+                _v = v[:10] + '...(comment: size: %d, only show: 10). ' % len(v)
+            print(k,_v)
+    omit_printing_content(wor)
+    
+    # delete
+    wor = wo.delete(wor.fid)
+    print(wor)
+    #----------------------------------------------------------- 
+    
+
+    #----------------------------------------------------------- 
+    # crud aliases
+    wop = operation.WeedOperation()
+    #
+    # create
+    wor = wop.crud_create('1.txt')
+    print(wor)
+    
+    # read
+    wor = wop.crud_read(wor.fid)
+    omit_printing_content(wor)
+    
+    # update
+    wor = wop.crud_update('1.jpg', wor.fid)
+    print(wor)
+    wor = wop.crud_get(wor.fid)
+    wor = wop.crud_read(wor.fid)
+    omit_printing_content(wor)
+    
+    # delete
+    wor = wop.delete(wor.fid)
+    print(wor)
+    #----------------------------------------------------------- 
+
+
+    #----------------------------------------------------------- 
+    # filer
+    from weed import filer
+    wf = filer.WeedFiler()
+    
+    # put
+    f = wf.put('1.txt')
+    f = wf.put('1.txt', '/helloworld/')
+    print(f)
+    
+    # get
+    f_get = wf.get('/helloworld/1.txt')
+    print(f_get)
+    omit_printing_content(f_get)
+    
+    # delete
+    f_delete = wf.delete('/helloworld/1.txt')
+    print(f_delete)
+    #----------------------------------------------------------- 

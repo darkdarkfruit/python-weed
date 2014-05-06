@@ -36,20 +36,16 @@ note:
     ensure weed master-server and at least one volume-server are up
     default:
         master-server: 127.0.0.1:9333
-        volume-server: 127.0.0.1:8080
+        volume-server: 127.0.0.1:27000
+        filer-server : 127.0.0.1:27100
 
 '''
-import os
-import sys
-import urlparse
-import StringIO
 
-TEST_PATH = os.path.split(__file__)[0]
-WEED_PATH = os.path.split(TEST_PATH)[0]
-if WEED_PATH not in sys.path:
-    sys.path.insert(0, WEED_PATH)
+from env_test_env import *
+
 
 import weed
+print(weed)
 from weed import master
 from weed.conf import *
 from weed.util import *
@@ -57,6 +53,8 @@ from weed.master import *
 from weed.volume import *
 from weed.operation import *
 from weed.filer import WeedFiler
+
+set_global_logger_level(logging.DEBUG)
 
 WEED_MASTER_IP = '127.0.0.1'
 WEED_MASTER_PORT = 9333
@@ -307,10 +305,23 @@ def test_WeedFiler():
 
     d = '/test/'
     new_d = '/test/new_dir/'
-    assert wf.put(StringIO.StringIO('hello, how are you'), d + 'test.txt') == d + 'test.txt'
+
+    # put f1
+    f1_content = 'hello, how are you'
+    f1 = StringIO.StringIO(f1_content)
+    f1_path = d + 'test.txt'
+    assert wf.put(f1, f1_path) == f1_path
+
+    # mkdir
     assert wf.mkdir(new_d)
-    f = StringIO.StringIO('hello, how are you?')
-    assert wf.put(f, os.path.join(new_d, 'hello.txt')) == os.path.join(new_d, 'hello.txt')
+
+    # put f2
+    f2_content = 'hello, how are you?'
+    f2 = StringIO.StringIO(f2_content)
+    f2_path = new_d + 'hello.txt'
+    assert wf.put(f2, f2_path) == f2_path
+
+    # list
     j = wf.list(new_d)
     assert isinstance(j, dict)
     assert j.has_key('Directory')
@@ -321,6 +332,22 @@ def test_WeedFiler():
     for f in files:
         fnames.append(f['Name'])
     assert 'hello.txt' in fnames
+
+    # get f1
+    wf_get = wf.get(f1_path)
+    assert wf_get['content_length'] > 0
+    if 'gzip' in wf_get['content_type']:
+        content_gz = wf['content']
+        content = gzip.open(StringIO.StringIO(content_gz)).read()
+        assert content == f1_content
+    elif 'text' in wf_get['content_type']:
+        assert wf_get['content'] == f1_content
+    else:
+        pass
+
+    # delete f1, f2
+    assert wf.delete(f1_path)
+    assert wf.delete(f2_path)
 
 
 

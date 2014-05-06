@@ -57,7 +57,7 @@ class WeedFiler(object):
         self.url = '%s://' % self.protocol + self.uri
 
 
-    def put(self, fp, remote_path, echo=False):
+    def get(self, remote_path):
         """ put a file @fp to @remote_path on weedfs
 
         returns @remote_path if succeeds else None
@@ -67,10 +67,34 @@ class WeedFiler(object):
         - `echo`: if True, print response
         """
         url = urlparse.urljoin(self.url, remote_path)
+        result = None
         try:
-            if echo:
-                LOGGER.debug('http POST %s' % url)
-            rsp = requests.post(url, files={'file' : fp if not isinstance(fp, str) else open(fp, 'rb')})
+            rsp = requests.get(url)
+            if rsp.ok:
+                result =  {'content_length' : rsp.headers.get('content-length'),
+                           'content_type' : rsp.headers.get('content-type'),
+                           'content' : rsp.content}
+            else:
+                LOGGER.error('%d GET %s' % (rsp.status_code, url))
+        except Exception as e:
+            LOGGER.error('Error POSTing %s. e:%s' % (url, e))
+
+        return result
+
+
+    def put(self, fp, remote_path):
+        """ put a file @fp to @remote_path on weedfs
+
+        returns @remote_path if succeeds else None
+        Arguments:
+        - `self`:
+        - `remote_path`:
+        - `echo`: if True, print response
+        """
+        url = urlparse.urljoin(self.url, remote_path)
+        _fp = open(fp, 'r') if isinstance(fp, str) else fp
+        try:
+            rsp = requests.post(url, files={'file' : _fp})
             if rsp.ok:
                 return remote_path
             else:
@@ -78,18 +102,27 @@ class WeedFiler(object):
         except Exception as e:
             LOGGER.error('Error POSTing %s. e:%s' % (url, e))
 
+        # close fp if parameter fp is a str
+        if isinstance(fp, str):
+            try:
+                _fp.close()
+            except Exception as e:
+                LOGGER.warning('Could not close fp: %s. e: %s' % (_fp, e))
+
         return None
 
 
-    def rm(self, remote_path):
+    def delete(self, remote_path):
         ''' remove a @remote_path by http DELETE '''
+        url = urlparse.urljoin(self.url, remote_path)
         try:
-            rsp = requests.delete(remote_path)
+            rsp = requests.delete(url)
             if not rsp.ok:
                 LOGGER.error('Error deleting file: %s. ' % (remote_path))
             return rsp.ok
         except Exception as e:
             LOGGER.error('Error deleting file: %s. e: %s' % (remote_path, e))
+            return False
 
 
     def list(self, dir, pretty=False):
