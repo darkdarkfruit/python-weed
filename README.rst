@@ -48,6 +48,7 @@ Usage (sample)
 
 ::
 
+    #----------------------------------------------------------- 
     In [1]: from weed.master import WeedMaster
     
     In [2]: master = WeedMaster()
@@ -150,9 +151,10 @@ Usage (sample)
        u'RepType': u'000',
        u'Size': 0,
        u'Version': 2}]}
+    #----------------------------------------------------------- 
 
 
-:: 
+
     #----------------------------------------------------------- 
     from weed import operation
     wo = operation.WeedOperation()
