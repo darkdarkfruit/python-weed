@@ -156,6 +156,14 @@ Usage (sample)
 
 
     #----------------------------------------------------------- 
+    def omit_printing_content(d):
+        ''' not showing large content on content '''
+        for k,v in d.items():
+            _v = v
+            if k == 'content' and v and len(v) > 10:
+                _v = v[:10] + '...(comment: size: %d, only show: 10). ' % len(v)
+            print(k,_v)
+
     from weed import operation
     wo = operation.WeedOperation()
     
