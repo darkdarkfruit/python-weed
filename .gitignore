@@ -57,6 +57,7 @@ docs/_build/
 
 
 # customize, don't index temporary files by vim or emacs or ,,
+*.swp
 *~
 .*~
 .#*
