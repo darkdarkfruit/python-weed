@@ -46,15 +46,14 @@ from volume import *
 class WeedOperation(object):
     """ DO CRUD operations to weed-fs.
 
-    You just need to supply weed master. The master will find a volume automaticlly.
-    Currently, implement it with /* tornado and */ requests. Maybe mongrel2 + brubeck is better?
+    Arguments you need to supply is just weed master.
+    The master will find a volume automaticlly.
+    Currently, implement it with requests. Maybe *tornado or  *mongrel2 + brubeck* is better?
 
     """
 
     def __init__(self, master_host='127.0.0.1', master_port=9333):
         self.master = WeedMaster(master_host, master_port)
-
-
 
 
     def get_volume_fid_full_url(self, fid):
@@ -88,7 +87,6 @@ class WeedOperation(object):
             return fids
 
 
-
     def get_fid_full_url(self, fid):
         ''' return a random fid_full_url of volume by @fid
 
@@ -111,9 +109,8 @@ class WeedOperation(object):
 
         return something like: 'http://127.0.0.1:8080/3,0230203913'
         '''
-        result = None
         volume_id = fid.split(',')[0]
-        full_url = ''
+        full_url = None
         try:
             r = self.master.lookup(volume_id)
             locations = r['locations']
@@ -123,15 +120,72 @@ class WeedOperation(object):
             full_url = 'http://%s/%s' % (location['url'], fid)
         except Exception as e:
             LOGGER.error('Could not get volume location of this fid: %s. Exception is: %s' % (fid, e))
-            result = None
         return full_url
 
 
+    ## -----------------------------------------------------------
+    ##    weedfs operation: get/put/delete, and CRUD-aliases starts
+    ## -----------------------------------------------------------
+    def get(self, fid, fname='', just_url=False, just_content=True):
+        """
+        read/get a file from weed-fs with @fid.
+
+        @just_url(default is False):
+          if True -> just return an object of WeedOperationResponse(web-servers/browsers like nginx, chrome can get resource by this url( WeedOperationResponse.fid_full_url ))
+          if False -> return a http response of requests(package requests) if @just_content is False else return file_content
+
+        @just_content(default is True):
+          if True -> just return the file's content
+          if False -> return a response of requests.Respond object. (eg: You can get content_type of the file being get)
+
+        return a WeedOperationResponse instance
+        """
+        LOGGER.debug('|--> Getting file. fid: %s, fname:%s, just_url: %s' % (fid, fname, just_url))
+
+        fid_full_url = 'wrong_url'
+        wor = WeedOperationResponse()
+        try:
+            fid_full_url = self.get_fid_full_url(fid)
+            LOGGER.debug('Reading file(just_url:%s): fid: %s, fname: %s, fid_full_url: %s' % (just_url, fid, fname, fid_full_url))
+            rsp = self.get_http_response(fid_full_url)
+            wor.status = 'success'
+            wor.fid = fid
+            wor.url = fid_full_url
+            wor.name = fname
+            wor.content = rsp.content
+            wor.content_type = rsp.headers.get('content-type')
+        except Exception as e:
+            err_msg = 'Could not read file(just_url:%s): fid: %s, fname: %s, fid_full_url: %s, e: %s' % (just_url, fid, fname, fid_full_url, e)
+            LOGGER.error(err_msg)
+            wor.status = 'fail'
+            wor.message = err_msg
+
+        return wor
 
 
-    ## -----------------------------------------------------------
-    ##    weedfs operation: CRUD starts
-    ## -----------------------------------------------------------
+    def get_url(self, fid):
+        ''' return a random fid_full_url of volume by @fid, alias to get_fid_full_url(fid)
+
+        eg: (randomly choosed from locations)
+          return:  'http://127.0.0.1:27000/3,1234101234'  or
+          return:  'http://127.0.0.1:27001/3,1234101234'  or
+          return:  'http://127.0.0.1:27002/3,1234101234'
+
+        return something like: 'http://127.0.0.1:8080/3,0230203913'
+        '''
+        return self.get_fid_full_url(fid)
+
+
+    def get_http_response(self, fid_full_url):
+        ''' return a "requests.Response" if we want whole info of the http request '''
+        return requests.get(fid_full_url)
+
+
+    def get_content(self, fid, fname=''):
+        ''' return just file's content. use method "get" to get more file's info '''
+        return self.get(fid, fname).content
+
+
     def put(self, fp, fid=None, fname=''):
         """  put a file to weed-fs.
 
@@ -140,7 +194,7 @@ class WeedOperation(object):
 
         return a WeedOperationResponse instance
         """
-        LOGGER.info('|--> Putting file@fid:%s, fname:%s' % (fid, fname) )
+        LOGGER.info('|--> Putting file@fid:%s, fname:%s' % (fid, fname))
         fid_full_url = 'wrong_url'
         _fid = fid
         try:
@@ -157,126 +211,87 @@ class WeedOperation(object):
             LOGGER.error(err_msg)
             return None
 
+        wor = WeedOperationResponse()
         try:
             LOGGER.info('Putting file with fid: %s, fid_full_url:%s for file: fp: %s, fname: %s'
                          % (_fid, fid_full_url, fp, fname))
-            data = put_file(fp, fid_full_url, fname)
-            LOGGER.info('%s' % data)
-            data.fid = _fid
-            return data
+            wor = put_file(fp, fid_full_url, fname)
+            LOGGER.info('%s' % wor)
+            wor.fid = _fid
         except Exception as e:
             err_msg = 'Could not put file. fp: "%s", fname: "%s", fid_full_url: "%s", e: %s' % (fp, fname, fid_full_url, e)
             LOGGER.error(err_msg)
-            return None
+            wor.status = 'fail'
+            wor.message = err_msg
+        return wor
 
 
-    def get(self, fid, fname='', just_url=False, just_content=True):
-        """
-        read/get a file from weed-fs with @fid.
-
-        @just_url(default is False):
-          if True -> just return an object of WeedOperationResponse(web-servers/browsers like nginx, chrome can get resource by this url( WeedOperationResponse.fid_full_url ))
-          if False -> return a http response of requests(package requests) if @just_content is False else return file_content
-
-        @just_content(default is True):
-          if True -> just return the file's content
-          if False -> return a response of requests.Respond object. (eg: You can get content_type of the file being get)
-
-        return a WeedOperationResponse instance
-        """
-        LOGGER.debug('|--> Getting file. fid: %s, fname:%s, just_url: %s' % (fid, fname, just_url) )
-
-        fid_full_url = 'wrong_url'
-        try:
-            fid_full_url = self.get_fid_full_url(fid)
-            LOGGER.debug('Reading file(just_url:%s): fid: %s, fname: %s, fid_full_url: %s' % (just_url, fid, fname, fid_full_url))
-            if just_url:
-                _r = WeedOperationResponse()
-                _r.fid = fid
-                _r.fid_full_url = fid_full_url
-                _r.fname = fname
-                _r.storage_size = -1
-                return _r
-            else:
-                rsp = requests.get(fid_full_url)
-                if just_content:
-                    return rsp.content
-                else:
-                    return rsp
-        except Exception as e:
-            err_msg = 'Could not read file(just_url:%s): fid: %s, fname: %s, fid_full_url: %s, e: %s' % (just_url, fid, fname, fid_full_url, e)
-            LOGGER.error(err_msg)
-            return None
-
-
-    def rm(self, fid, fname=''):
+    def delete(self, fid, fname=''):
         """ remove a file in weed-fs with @fid.
 
         if storage == 0, then @fid in weedfs is not exist.
 
         return a WeedOperationResponse instance
         """
-        LOGGER.info('|--> Removing file@%s, fname: %s' % (fid, fname) )
-        _r = WeedOperationResponse()
+        LOGGER.debug('|--> Deleting file@%s, fname: %s' % (fid, fname))
+        wor = WeedOperationResponse()
         fid_full_url = 'wrong_url'
         try:
             fid_full_url = self.get_fid_full_url(fid)
             LOGGER.debug('Deleting file: fid: %s, fname: %s, fid_full_url: %s' % (fid, fname, fid_full_url))
 
             r = requests.delete(fid_full_url)
-            _j = r.json()
+            rsp_json = r.json()
 
-            _r.fid = fid
-            _r.fid_full_url = fid_full_url
-            _r.fname = fname
+            wor.status = 'success'
+            wor.fid = fid
+            wor.url = fid_full_url
+            wor.name = fname
 
-            if _j.has_key('size'):
-                _r.storage_size = _j['size']
-                if _r.storage_size == 0:
-                    LOGGER.error('Error: fid@%s is not exist.' % fid)
+            if rsp_json.has_key('size'):
+                wor.storage_size = rsp_json['size']
+                if wor.storage_size == 0:
+                    err_msg = ('Error: fid@%s is not exist.' % fid)
+                    wor.status = 'fail'
+                    wor.message = err_msg
+                    LOGGER.error(err_msg)
         except Exception as e:
             err_msg = 'Deleting file: fid: %s, fname: %s, fid_full_url: %s, e: %s' % (fid, fname, fid_full_url, e)
             LOGGER.error(err_msg)
-        return _r
+            wor.status = 'fail'
+            wor.message = err_msg
+            LOGGER.error(err_msg)
+
+        return wor
 
 
-    def create(self, fp, fname=''):
-        """  CREATE of CRUD(C)
-        create a file in weed-fs with @fid
-
-        return a WeedOperationResponse instance
+    def crud_create(self, fp, fname=''):
+        """  CREATE of CRUD(C). Alias to method: "put"
         """
-        LOGGER.debug('--> Trying to create a file. fp:%s, fname:%s' % (fp, fname) )
-        return self.put(fp, None, fname=fname)
+        LOGGER.debug('--> Trying to create a file. fp:%s, fname:%s' % (fp, fname))
+        return self.put(fp, fname=fname)
 
 
-    def read(self, fid, fname='', just_url=False, just_content=True):
-        """  READ of CRUD(R)
-        Alias to get method.(Alias here to supply full CRUD)
+    def crud_read(self, fid, fname=''):
+        """  READ of CRUD(R). Alias to method: "get"
         """
-        LOGGER.debug('--> Trying to read a file. fid: %s, fname:%s, just_url: %s' % (fid, fname, just_url) )
-        return self.get(fid, fname=fname, just_url=just_url, just_content=just_content)
+        LOGGER.debug('--> Trying to read a file. fid: %s, fname:%s' % (fid, fname))
+        return self.get(fid, fname=fname)
 
 
-    def update(self, fp, fid, fname=''):
-        """ UPDATE of CRUD(U)
-        update a file in weed-fs with @fid
-
-        return a WeedOperationResponse instance
+    def crud_update(self, fp, fid, fname=''):
+        """ UPDATE of CRUD(U). Alias to method: "put" but giving parameter: @fid
         """
-        LOGGER.info('--> Trying to update a file@fid:%s, fname: %s' % (fid, fname) )
-
+        LOGGER.info('--> Trying to update a file@fid:%s, fname: %s' % (fid, fname))
         return self.put(fp, fid=fid, fname=fname)
 
-
-    def delete(self, fid, fname=''):
-        """ DELETE of CRUD(D)
-        delete a file in weed-fs with @fid. return a integer representing the file storage in weedfs.
-
-        return a WeedOperationResponse instance
+    def crud_delete(self, fid, fname=''):
+        """ DELETE of CRUD(U). Alias to method: "put" but giving parameter: @fid
         """
-        LOGGER.info('--> Trying to delete file@%s, fname: %s' % (fid, fname) )
-        return self.rm(fid, fname=fname)
+        LOGGER.info('--> Trying to delete a file@fid:%s, fname: %s' % (fid, fname))
+        return self.delete(fid=fid, fname=fname)
+
+
 
     ## -----------------------------------------------------------
     ##    weedfs operation: CRUD ends
@@ -294,10 +309,10 @@ class WeedOperation(object):
         replace file@dst_fid with file@src_fid
         """
         try:
-            src_file_rsp = self.read(src_fid, fname=src_fname, just_url=False)
+            src_file_rsp = self.crud_read(src_fid, fname=src_fname, just_url=False)
             fp = StringIO.StringIO(src_file_rsp.content)
             LOGGER.debug('Updating file: dst_fid: %s, src_fid: %s, src_fname: %s,  fp: %s' % (dst_fid, src_fid, src_fname, fp))
-            return self.update(fp, dst_fid, src_fname)
+            return self.crud_update(fp, dst_fid, src_fname)
         except Exception as e:
             err_msg = 'Could not Updating file: dst_fid: %s, src_fid: %s, src_fname: %s. e: %s' % (dst_fid, src_fid, src_fname, e)
             LOGGER.error(err_msg)

@@ -47,12 +47,12 @@ class WeedVolume(object):
       Weed-FS's volume server(relative to master-server)
     """
 
-    def __init__(self, host='127.0.0.1', port=8080):
+    def __init__(self, host='127.0.0.1', port=27000):
         """
 
         Arguments:
-        - `host`:
-        - `port`:
+        - `host`: defaults to '127.0.0.1'
+        - `port`: defaults to 27000
         """
         self.host = host
         self.port = port

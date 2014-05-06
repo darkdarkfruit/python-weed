@@ -91,17 +91,34 @@ class WeedAssignKeyExtended(WeedAssignKey):
 
 
 class WeedOperationResponse(dict):
-    ''' represent this json in dict and object:
+    ''' A dict representing response when doing operations like "get, put, delete"
 
-    {"count":1,"fid":"3,01637037d6","url":"127.0.0.1:8080","publicUrl":"localhost:8080"}
+      properties:
+      -----------------------------------------------------------
+        self['status'] = 'success' # 'success', 'fail' and 'error'. similar to "jsend"
+        self['message'] = 'ok'     # message for the status.
 
+        self['fid'] = ''           # fid in weed-fs
+        self['storage_size'] = 0   # storage_size in weed-fs
+        self['url'] = ''           # an randomly chosed accessible volume url
+        self['fname'] = ''         # filename if available
+
+        self['content_type'] = ''   # content_type of the file, set when do operation "get"
+        self['content'] = ''        # content of the file, set when do operation "get"
+      -----------------------------------------------------------
     '''
     def __init__(self, *args, **kws):
         super(WeedOperationResponse, self).__init__(*args, **kws)
-        self['fid'] = ''
-        self['storage_size'] = 0
-        self['fid_full_url'] = ''
-        self['fname'] = ''
+        self['status'] = 'success' # 'success', 'fail' and 'error'. similar to "jsend"
+        self['message'] = 'ok'     # message for the status.
+
+        self['fid'] = None           # fid in weed-fs
+        self['storage_size'] = None   # storage_size in weed-fs
+        self['url'] = None           # an randomly chosed accessible volume url
+        self['name'] = None         # filename if available
+
+        self['content_type'] = None   # content_type of the file, set when do operation "get". eg: 'text/html; charset=UTF-8'; 'image/jpeg; charset=UTF-8'
+        self['content'] = None        # content of the file, set when do operation "get"
 
         ## http://stackoverflow.com/questions/4984647/accessing-dict-keys-like-an-attribute-in-python
         self.__dict__ = self
@@ -143,18 +160,25 @@ def put_file(fp, fid_full_url, fname='', http_headers=None):
     fp.seek(pos)
 
     # LOGGER.debug(rsp.request.headers)
-    _j = rsp.json()
-    _r = WeedOperationResponse()
-    _r['fid_full_url'] = fid_full_url
-    _r.fname = fname
-    _r.storage_size = rsp.json().get('size', 0)
-    LOGGER.info('_r is: %s' % _r)
+    rsp_json = rsp.json()
+    wor = WeedOperationResponse()
+    wor.status == 'success'
+    wor.url = fid_full_url
+    wor.fname = fname
+    wor.storage_size = rsp.json().get('size', 0)
+    LOGGER.info('wor is: %s' % wor)
 
-    if 'error' in _j:
-        LOGGER.error('Put file fails. Error returns from weedfs: "%s"' % _j['error'])
-    if not _j.has_key('size') or _j['size'] == 0: # post new file fails
+    if 'error' in rsp_json:
+        LOGGER.error('Put file fails. Error returns from weedfs: "%s"' % rsp_json['error'])
+        wor.status = 'fail'
+        wor.message = rsp_json['error']
+    elif not rsp_json.has_key('size') or rsp_json['size'] == 0: # post new file fails
         err_msg = 'Could not save file on weed-fs with fid_full_url: %s' % (fid_full_url)
         LOGGER.error(err_msg)
+        wor.status = 'fail'
+        wor.message = err_msg
+    else:
+        pass
 
-    return _r
+    return wor
 

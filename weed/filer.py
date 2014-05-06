@@ -47,8 +47,8 @@ class WeedFiler(object):
         """ construct WeedFiler
 
         Arguments:
-        - `host`:
-        - `port`:
+        - `host`: defaults to '127.0.0.1'
+        - `port`: defaults to 27100
         """
         self.host = host
         self.port = port

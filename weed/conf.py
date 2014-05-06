@@ -26,7 +26,13 @@
 configuration of python-weed
 '''
 
+
 import logging
+
+
+# -----------------------------------------------------------
+# log settings.
+
 LOGGER = logging.getLogger("python-weed")
 
 def set_logger_level(logger, logging_level=logging.DEBUG):
@@ -35,10 +41,14 @@ def set_logger_level(logger, logging_level=logging.DEBUG):
 
 # for production mode, you might set it to logging.WARNNING
 #set_logger_level(LOGGER, logging.WARNING)
-set_logger_level(LOGGER, logging.DEBUG)
+def set_global_logger_level(logging_level=logging.DEBUG):
+    return set_logger_level(LOGGER, logging_level)
 
+def set_global_logger_silent():
+    ''' silent the global logger '''
+    return set_global_logger_level(logging.CRITICAL)
 
-
+set_global_logger_level(logging.DEBUG)
 
 ## if we have tornado installed, we can use its pritty-print log
 try:
@@ -46,6 +56,9 @@ try:
     tornado.options.parse_command_line() # use log of tornado
 except:
     pass
+
+
+# -----------------------------------------------------------
 
 
 ## caches volume_id to speed up lookup performance since volume_id will not change frequently

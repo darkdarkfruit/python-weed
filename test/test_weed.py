@@ -237,14 +237,13 @@ def test_put_file():
 
         rsp = put_file(f, fid_full_url, fname)
         assert rsp
-        assert rsp.has_key('fid_full_url')
-        fid_full_url = rsp['fid_full_url']
+        assert rsp.status == 'success'
+        assert rsp.has_key('url') and rsp.url
+        assert rsp.storage_size > 0
         fid = os.path.split(fid_full_url)[1]
-        assert rsp['fid_full_url']
-        assert rsp['storage_size'] > 0
 
     # read
-    content = op.read(fid, fname, just_url=False)
+    content = op.crud_read(fid, fname).content
     with open(fpath) as _:
         original_content = _.read()
     assert content == original_content
@@ -260,18 +259,18 @@ def test_file_operations():
     fname = 'test_opensource_logo.jpg'
     fpath = os.path.join(TEST_PATH, fname)
     with open(fpath, 'r') as f:
-        rsp = op.create(f, fname)
+        rsp = op.crud_create(f, fname)
         assert rsp
         assert rsp.has_key('fid')
         fid = rsp['fid']
         assert os.path.split(op.get_fid_full_url(fid))[1] == fid
         assert rsp['fid'].replace(',', '') > '01'
-        assert rsp['fid_full_url']
+        assert rsp['url']
         assert rsp['storage_size'] > 0
 
     # read
-    content = op.read(fid, fname, just_url=False, just_content=False).content
-    content2 = op.read(fid, fname, just_url=False, just_content=True)
+    content = op.get(fid, fname).content
+    content2 = op.get_content(fid, fname)
     assert content == content2
     with open(fpath) as _:
         original_content = _.read()
@@ -283,19 +282,19 @@ def test_file_operations():
     with open(fpath, 'rwb+') as tmp_file:
         tmp_file.write("testdata " * 1024 * 256)
         tmp_file.seek(0)
-        rsp = op.update(tmp_file, fid)
+        rsp = op.crud_update(tmp_file, fid)
         assert rsp
         assert rsp.has_key('fid')
         fid_2 = rsp['fid']
         assert fid_2 == fid
         assert rsp['fid'].replace(',', '') > '01'
-        assert rsp['fid_full_url']
+        assert rsp['url']
         assert rsp['storage_size'] > 0
 
     # delete
-    rsp = op.delete(fid)
+    rsp = op.crud_delete(fid)
     assert rsp.storage_size > 0
-    rsp = op.delete('3,20323023') # delete an unexisted file, should return False
+    rsp = op.crud_delete('3,20323023') # delete an unexisted file, should return False
     assert rsp.storage_size == 0
 
 
