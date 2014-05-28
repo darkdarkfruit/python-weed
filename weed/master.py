@@ -57,12 +57,13 @@ class WeedMaster(object):
     Weed-FS's master server (relative to volume-server)
     """
 
-    def __init__(self, host='127.0.0.1', port=9333):
+    def __init__(self, host='127.0.0.1', port=9333, prefetch_volumeIds=False):
         """
 
         Arguments:
         - `host`:
         - `port`:
+        - `prefetch_volumeIds`: if True, prefech volumeIds to cache: self.volumes_cache
         """
         self.host = host
         self.port = port
@@ -76,6 +77,11 @@ class WeedMaster(object):
 
         # volumes usually do not move, so we cache it here for 1 minute.
         self.volumes_cache = {}
+
+        if prefetch_volumeIds:
+            LOGGER.info("prefetching volumeIds(['1' : '10'] into cache")
+            for i in range(10):
+                self.lookup(str(i + 1))
 
 
     def acquire_assign_info(self):
@@ -168,16 +174,23 @@ class WeedMaster(object):
             _volume_id = volume_id_or_fid
         result = None
         try:
+            # LOGGER.warning('id(master): %x, cache should be hit: %s' % (id(self), self.volumes_cache.has_key(_volume_id)))
+            # LOGGER.warning('self.volumes_cache: %s' % self.volumes_cache)
             ## try cache first
             if self.volumes_cache.has_key(_volume_id) and (time.time() - self.volumes_cache[_volume_id][1]) <= cache_duration_in_seconds:
                 LOGGER.debug('volume_cache(lookup by volume_id) hits')
                 return self.volumes_cache[_volume_id][0]
             else:
                 r = requests.get(self.url_lookup + '?volumeId=%s' % _volume_id)
+                if not r.ok:    # not HTTP-200, like HTTP-404, ...
+                    return None
                 result = json.loads(r.content)
 
                 ## refresh cache
                 self.volumes_cache.update({_volume_id : (result, time.time())})
+                # LOGGER.warning('volume_cache(lookup by volume_id) not hit, dst: %s, keys: %s' % (_volume_id, self.volumes_cache.keys())
+
+            # LOGGER.warning('after updating, self.volumes_cache: %s' % self.volumes_cache)
 
         except Exception as e:
             LOGGER.error("Could not get status of this volume: %s. "

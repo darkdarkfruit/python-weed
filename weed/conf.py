@@ -48,7 +48,9 @@ def set_global_logger_silent():
     ''' silent the global logger '''
     return set_global_logger_level(logging.CRITICAL)
 
+# set_global_logger_level(logging.WARNING)
 set_global_logger_level(logging.WARNING)
+
 
 ## if we have tornado installed, we can use its pritty-print log
 try:

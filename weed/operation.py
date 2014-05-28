@@ -35,7 +35,7 @@ import random
 import StringIO
 import urlparse
 import requests
-from conf import LOGGER
+from conf import *
 from util import *
 
 from master import *
@@ -52,8 +52,8 @@ class WeedOperation(object):
 
     """
 
-    def __init__(self, master_host='127.0.0.1', master_port=9333):
-        self.master = WeedMaster(master_host, master_port)
+    def __init__(self, master_host='127.0.0.1', master_port=9333, prefetch_volumeIds=False):
+        self.master = WeedMaster(master_host, master_port, prefetch_volumeIds=prefetch_volumeIds)
 
 
     def get_volume_fid_full_url(self, fid):
@@ -273,6 +273,31 @@ class WeedOperation(object):
             LOGGER.error(err_msg)
 
         return wor
+
+
+    def exists(self, fid):
+        ''' detects @fid's existence '''
+        if ',' not in fid:      # fid should have a volume_id
+            return False
+        try:
+            volume_id = fid.split(',')[0]
+        except Exception as e:
+            LOGGER.error('Invalid fid:"%s". e: %s' % (fid, e))
+            return False
+
+        if not self.master.lookup(volume_id):
+            return False
+        fid_full_url = self.get_fid_full_url(fid)
+        try:
+            rsp = requests.head(fid_full_url, allow_redirects=True)
+            if not rsp.ok:
+                return False
+            else:
+                return True
+        except Exception as e:
+            LOGGER.error('Error occurs while requests.head. e: %s' % e)
+            return False
+
 
 
     def crud_create(self, fp, fname=''):

@@ -266,6 +266,13 @@ def test_file_operations():
         assert rsp['url']
         assert rsp['storage_size'] > 0
 
+    # test exists
+    assert op.exists(fid)
+    assert op.exists(fid + 'wrong_fid') == False
+    assert op.exists('wrong_fid') == False
+    assert op.exists(fid.replace(',', '/')) == False
+
+
     # read
     content = op.get(fid, fname).content
     content2 = op.get_content(fid, fname)
