@@ -1,3 +1,10 @@
+version 0.1.7 released @Thu May 29 06:51:48 UTC 2014
+=====================================================
+changelog:
+v_0.1.7 released. add some functions:
+- add prefetch volumeids for master to get volumeId more quickly; 
+- add WeedOperation.exists(fid) to detect fid's existence
+
 
 version 0.1.6 released @Tue May  6 01:35:38 UTC 2014
 =====================================================
