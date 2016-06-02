@@ -11,7 +11,7 @@ Install
 
 Or if you want the latest version:
 
-    pip install https://github.com/rwuerfel/python-weed/archive/master.zip
+    pip install https://github.com/darkdarkfruit/python-weed/archive/master.zip
 
 
 Test
