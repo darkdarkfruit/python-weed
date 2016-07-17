@@ -1,7 +1,8 @@
 python-weed. What is it?
 ========================
 
-A python module for weed-fs (https://code.google.com/p/weed-fs/).
+A python module for seaweedfs(https://github.com/chrislusf/seaweedfs.git)
+(Old name is: weed-fs (https://code.google.com/p/weed-fs/)).
 
 
 Install
