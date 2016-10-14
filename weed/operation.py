@@ -87,7 +87,7 @@ class WeedOperation(object):
             return fids
 
 
-    def get_fid_full_url(self, fid):
+    def get_fid_full_url(self, fid, get_public=False):
         ''' return a random fid_full_url of volume by @fid
 
         eg: (randomly choosed from locations)
@@ -117,7 +117,10 @@ class WeedOperation(object):
 
             # choose a random location
             location = locations[random.randint(0, len(locations) - 1)]
-            full_url = 'http://%s/%s' % (location['url'], fid)
+            if get_public is False:
+                full_url = 'http://%s/%s' % (location['url'], fid)
+            else:
+                full_url = 'http://%s/%s' % (location['publicUrl'], fid)
         except Exception as e:
             LOGGER.error('Could not get volume location of this fid: %s. Exception is: %s' % (fid, e))
         return full_url
