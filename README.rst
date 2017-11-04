@@ -69,7 +69,7 @@ Usage (sample)
      u'publicUrl': u'127.0.0.1:8080',
      u'url': u'127.0.0.1:8080'}
 
-    In [5]: master.lookup(4)
+    In [5]: master.lookup('4')
     Out[5]: {u'locations': [{u'publicUrl': u'127.0.0.1:8080', u'url': u'127.0.0.1:8080'}]}
 
     In [6]: master.get_status()
