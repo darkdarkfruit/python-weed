@@ -132,8 +132,9 @@ class WeedFiler(object):
         '''
         d = dir if dir.endswith('/') else (dir + '/')
         url = urlparse.urljoin(self.url, d)
+        headers = {'Accept': 'application/json'}
         try:
-            rsp = requests.get(url)
+            rsp = requests.get(url, headers=headers)
             if not rsp.ok:
                 LOGGER.error('Error listing "%s". [HTTP %d]' % (url, rsp.status_code))
             return rsp.json()
