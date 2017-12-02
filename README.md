@@ -29,16 +29,10 @@ Test
     > weed volume -port=27000 # start volume server in terminal 2
     > weed filer -port=27100  # start filer server in terminal 3
 
-    # start python-weed test
-    > python setup.py test
-
-    note: it may show the warning messages like something below:
-
-    "test.pytest.py/_pytest.core:147: UserWarning: Module _pytest was already
-    imported from test.pytest.py/_pytest, but /usr/local/lib/python2.6/dist-packages
-    is being added to sys.path"
-
-    It does no harm, just ommit it.
+    # start testing python-weed.
+    > pip2 install pytest
+    > pytest test/
+    
 
 
 Shortely

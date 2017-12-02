@@ -13,7 +13,7 @@ test_python_setup: ${file_pytest_genscript}
 test: ${files} test_python_setup
 	echo ''
 	echo '==> use "py.test test" directly: '
-	py.test test 
+	pytest test
 	echo ''
 	echo '==> use "python setup.py test": '
 	python setup.py test
