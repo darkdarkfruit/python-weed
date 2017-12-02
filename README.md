@@ -33,6 +33,10 @@ Test
     > pip2 install pytest
     > pytest test/
     
+    
+# Build
+    > python=python2 make sdist    
+    
 
 
 Shortely

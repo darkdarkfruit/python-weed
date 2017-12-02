@@ -10,17 +10,18 @@ test_python_setup: ${file_pytest_genscript}
 	py.test --genscript=${file_pytest_genscript}
 
 
-test: ${files} test_python_setup
+# test: ${files} test_python_setup
+test: ${files}
 	echo ''
 	echo '==> use "py.test test" directly: '
 	pytest test
-	echo ''
-	echo '==> use "python setup.py test": '
-	python setup.py test
+	# echo ''
+	# echo '==> use "python setup.py test": '
+	# python setup.py test
 
-# just py.test weed
+# just pytest weed
 stest: 
-	py.test test 
+	pytest test
 
 
 # make a source distribution in dist/
