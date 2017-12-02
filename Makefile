@@ -31,7 +31,9 @@ sdist: ${files} test
 
 # upload to pypi
 upload: sdist
-	python setup.py sdist upload
+	# python setup.py sdist upload
+	# pip2 install twine
+	twine upload dist/*
 
 
 install : test
