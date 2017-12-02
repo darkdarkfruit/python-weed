@@ -5,6 +5,11 @@ A python module for seaweedfs(https://github.com/chrislusf/seaweedfs.git)
 (Old name is: weed-fs (https://code.google.com/p/weed-fs/)).
 
 
+Python version
+===============
+Currently, python2.7
+
+
 Install
 =======
 
@@ -17,16 +22,23 @@ Or if you want the latest version:
 
 Test
 ====
+    # Download weedfs(https://github.com/chrislusf/seaweedfs.git) binary and install it.
 
-    python setup.py test
+    # Start weedfs servers: master server, volume server, filer server.
+    > weed master             # start master server in terminal 1
+    > weed volume -port=27000 # start volume server in terminal 2
+    > weed filer -port=27100  # start filer server in terminal 3
 
-note: it may show the warning messages like something below:
+    # start python-weed test
+    > python setup.py test
 
-"test.pytest.py/_pytest.core:147: UserWarning: Module _pytest was already
-imported from test.pytest.py/_pytest, but /usr/local/lib/python2.6/dist-packages
-is being added to sys.path"
+    note: it may show the warning messages like something below:
 
-It does no harm, just ommit it.
+    "test.pytest.py/_pytest.core:147: UserWarning: Module _pytest was already
+    imported from test.pytest.py/_pytest, but /usr/local/lib/python2.6/dist-packages
+    is being added to sys.path"
+
+    It does no harm, just ommit it.
 
 
 Shortely

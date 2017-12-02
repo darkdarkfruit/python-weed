@@ -331,13 +331,17 @@ def test_WeedFiler():
     # list
     j = wf.list(new_d)
     assert isinstance(j, dict)
-    assert j.has_key('Directory')
-    assert j['Directory'] == '/test/new_dir/'
+    # print(j)
+
+    if j.has_key('Directory'):
+        assert j['Directory'] == '/test/new_dir/'
+    if j.has_key('Path'):
+        assert j['Path'] == '/test/new_dir/'
     assert j['Files']
     files = j['Files']
     fnames = []
     for f in files:
-        fnames.append(f['Name'])
+        fnames.append(f['Name'] if 'Name' in f else f['name'] if 'name' in f else '')
     assert 'hello.txt' in fnames
 
     # get f1
