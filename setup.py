@@ -7,7 +7,7 @@ DESCRIPTION = "A python module for weed-fs"
 
 LONG_DESCRIPTION = None
 try:
-    LONG_DESCRIPTION = open('README.rst').read()
+    LONG_DESCRIPTION = open('README.md').read()
 except:
     pass
 
