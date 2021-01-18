@@ -32,11 +32,15 @@ in this module, default filer service port is set to: 27100
 __all__ = ['WeedFiler']
 
 import os
-import StringIO
+import io
+import urllib
+from urllib import parse
+
 
 import requests
-from conf import *
-from util import *
+from .conf import *
+from .util import *
+
 
 
 class WeedFiler(object):
@@ -66,7 +70,7 @@ class WeedFiler(object):
         - `remote_path`:
         - `echo`: if True, print response
         """
-        url = urlparse.urljoin(self.url, remote_path)
+        url = parse.urljoin(self.url, remote_path)
         result = None
         try:
             rsp = requests.get(url)
@@ -91,7 +95,7 @@ class WeedFiler(object):
         - `remote_path`:
         - `echo`: if True, print response
         """
-        url = urlparse.urljoin(self.url, remote_path)
+        url = parse.urljoin(self.url, remote_path)
         _fp = open(fp, 'r') if isinstance(fp, str) else fp
         try:
             rsp = requests.post(url, files={'file' : _fp})
@@ -114,7 +118,7 @@ class WeedFiler(object):
 
     def delete(self, remote_path):
         ''' remove a @remote_path by http DELETE '''
-        url = urlparse.urljoin(self.url, remote_path)
+        url = parse.urljoin(self.url, remote_path)
         try:
             rsp = requests.delete(url)
             if not rsp.ok:
@@ -131,7 +135,7 @@ class WeedFiler(object):
         returns a dict of "sub-folders and files'
         '''
         d = dir if dir.endswith('/') else (dir + '/')
-        url = urlparse.urljoin(self.url, d)
+        url = parse.urljoin(self.url, d)
         headers = {'Accept': 'application/json'}
         try:
             rsp = requests.get(url, headers=headers)
@@ -152,5 +156,5 @@ class WeedFiler(object):
 
         We will post a file named '.info' to @_dir.
         '''
-        return self.put(StringIO.StringIO('.info'), os.path.join(_dir, '.info'))
+        return self.put(io.StringIO('.info'), os.path.join(_dir, '.info'))
 

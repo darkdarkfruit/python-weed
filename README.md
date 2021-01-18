@@ -7,8 +7,14 @@ A python module for seaweedfs(https://github.com/chrislusf/seaweedfs.git)
 
 Python version
 ===============
-Currently, python2.7
 
+* python3.6+ (python3.6+ supports F-Strings: https://www.python.org/dev/peps/pep-0498/)
+* Note: For old python2.7 version, use the branch: `v0.2.3-suited-for-python2.7` or use tag: `python2.7`(or `v0.2.3`) of master
+* Note: We always refer python to python3.6+(also, pip to pip3) in the doc as python2 has been deprecated.
+
+Async support?
+==============
+todo: integrate httpx: https://github.com/encode/httpx
 
 Install
 =======
@@ -25,17 +31,19 @@ Test
     # Download weedfs(https://github.com/chrislusf/seaweedfs.git) binary and install it.
 
     # Start weedfs servers: master server, volume server, filer server.
-    > weed master             # start master server in terminal 1
-    > weed volume -port=27000 # start volume server in terminal 2
-    > weed filer -port=27100  # start filer server in terminal 3
+    > weed master             # start master server in terminal 1, listens on port:9333 by default. 
+    > weed volume -port=27000 # start volume server in terminal 2, listens on 27000
+    > weed filer -port=27100  # start filer server in terminal 3, listens on 27100
 
     # start testing python-weed.
-    > pip2 install pytest
+    > pip install pytest
     > pytest test/
     
     
 # Build
-    > python=python2 make sdist    
+    > python make sdist    
+    > # or
+    > python=python3 make sdist    
     
 
 

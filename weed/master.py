@@ -37,19 +37,19 @@ note:
 
 '''
 
-from urlparse import urljoin, urlunparse, ParseResult
+from urllib.parse import urljoin, urlunparse, ParseResult
 
 __all__ = ['WeedMaster']
 
 
 import time
 import json
-import urlparse
+import urllib.parse
 import requests
-from conf import *
-from util import *
+from .conf import *
+from .util import *
 
-from volume import WeedVolume
+from .volume import WeedVolume
 
 
 class WeedMaster(object):
@@ -57,19 +57,21 @@ class WeedMaster(object):
     Weed-FS's master server (relative to volume-server)
     """
 
-    def __init__(self, host='127.0.0.1', port=9333, prefetch_volumeIds=False):
+    def __init__(self, scheme='http', host='127.0.0.1', port=9333, prefetch_volumeIds=False):
         """
 
         Arguments:
         - `host`:
         - `port`:
         - `prefetch_volumeIds`: if True, prefech volumeIds to cache: self.volumes_cache
+        :param scheme:
         """
         self.host = host
         self.port = port
-        self.url_base_parts = ParseResult(scheme='http', netloc='%s:%d' % (host, port),
-                                          path='', params='', query='', fragment='')
-        self.url_base = urlunparse(self.url_base_parts)
+        # self.url_base_parts = ParseResult(scheme='http', netloc='%s:%d' % (host, port),
+        #                                   path='', params='', query='', fragment='')
+        # self.url_base = urlunparse(self.url_base_parts)
+        self.url_base = f'{scheme}://{host}:{port}'
         self.url_assign = urljoin(self.url_base, '/dir/assign')
         self.url_lookup = urljoin(self.url_base, '/dir/lookup')
         self.url_vacuum = urljoin(self.url_base, '/vol/vacuum')
@@ -177,7 +179,7 @@ class WeedMaster(object):
             # LOGGER.warning('id(master): %x, cache should be hit: %s' % (id(self), self.volumes_cache.has_key(_volume_id)))
             # LOGGER.warning('self.volumes_cache: %s' % self.volumes_cache)
             ## try cache first
-            if self.volumes_cache.has_key(_volume_id) and (time.time() - self.volumes_cache[_volume_id][1]) <= cache_duration_in_seconds:
+            if _volume_id in self.volumes_cache and (time.time() - self.volumes_cache[_volume_id][1]) <= cache_duration_in_seconds:
                 LOGGER.debug('volume_cache(lookup by volume_id) hits')
                 return self.volumes_cache[_volume_id][0]
             else:

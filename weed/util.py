@@ -26,9 +26,9 @@
 utils of python-weed like adaption of weed response, etc..
 '''
 import json
-import urlparse
+import urllib.parse
 import requests
-from conf import LOGGER
+from .conf import LOGGER
 
 
 class WeedAssignKey(dict):
@@ -52,7 +52,7 @@ class WeedAssignKey(dict):
                 LOGGER.error('Error for json.loads "%s".\nException: %s'
                              % (json_of_weed_response, e))
 
-        for k, v in self.items():
+        for k, v in list(self.items()):
             setattr(self, k, v)
         super(WeedAssignKey, self).__init__()
 
@@ -79,14 +79,14 @@ class WeedAssignKeyExtended(WeedAssignKey):
         ''' update "full_url" and "full_publicUrl" '''
         self['full_url'] = 'http://' + self['url']
         self['full_publicUrl'] = 'http://' + self['publicUrl']
-        self['fid_full_url'] = urlparse.urljoin(self['full_url'], self['fid'])
-        self['fid_full_publicUrl'] = urlparse.urljoin(self['full_publicUrl'], self['fid'])
-        for k, v in self.items():
+        self['fid_full_url'] = urllib.parse.urljoin(self['full_url'], self['fid'])
+        self['fid_full_publicUrl'] = urllib.parse.urljoin(self['full_publicUrl'], self['fid'])
+        for k, v in list(self.items()):
             setattr(self, k, v)
-        # self['full_url'] = urlparse.urljoin('http://', self['url'])
-        # self['full_publicUrl'] = urlparse.urljoin('http://', self['publicUrl'])
-        # self['fid_full_url'] = urlparse.urljoin(self['full_url'], self['fid'])
-        # self['fid_full_publicUrl'] = urlparse.urljoin(self['full_publicUrl'], self['fid'])
+        # self['full_url'] = parse.urljoin('http://', self['url'])
+        # self['full_publicUrl'] = parse.urljoin('http://', self['publicUrl'])
+        # self['fid_full_url'] = parse.urljoin(self['full_url'], self['fid'])
+        # self['fid_full_publicUrl'] = parse.urljoin(self['full_publicUrl'], self['fid'])
 
 
 
@@ -172,7 +172,7 @@ def put_file(fp, fid_full_url, fname='', http_headers=None):
         LOGGER.error('Put file fails. Error returns from weedfs: "%s"' % rsp_json['error'])
         wor.status = 'fail'
         wor.message = rsp_json['error']
-    elif not rsp_json.has_key('size') or rsp_json['size'] == 0: # post new file fails
+    elif 'size' not in rsp_json or rsp_json['size'] == 0: # post new file fails
         err_msg = 'Could not save file on weed-fs with fid_full_url: %s' % (fid_full_url)
         LOGGER.error(err_msg)
         wor.status = 'fail'

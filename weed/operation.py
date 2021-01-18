@@ -32,14 +32,14 @@ __all__ = ['WeedOperation']
 
 import json
 import random
-import StringIO
-import urlparse
+import io
+import urllib.parse
 import requests
-from conf import *
-from util import *
+from .conf import *
+from .util import *
 
-from master import *
-from volume import *
+from .master import *
+from .volume import *
 
 
 
@@ -53,7 +53,7 @@ class WeedOperation(object):
     """
 
     def __init__(self, master_host='127.0.0.1', master_port=9333, prefetch_volumeIds=False):
-        self.master = WeedMaster(master_host, master_port, prefetch_volumeIds=prefetch_volumeIds)
+        self.master = WeedMaster(host=master_host, port=master_port, prefetch_volumeIds=prefetch_volumeIds)
 
 
     def get_volume_fid_full_url(self, fid):
@@ -216,7 +216,7 @@ class WeedOperation(object):
 
         wor = WeedOperationResponse()
         try:
-            _fp = open(fp, 'r') if isinstance(fp, str) else fp
+            _fp = open(fp, 'rb') if isinstance(fp, str) else fp
 
             LOGGER.info('Putting file with fid: %s, fid_full_url:%s for file: fp: %s, fname: %s'
                          % (_fid, fid_full_url, fp, fname))
@@ -261,7 +261,7 @@ class WeedOperation(object):
             wor.url = fid_full_url
             wor.name = fname
 
-            if rsp_json.has_key('size'):
+            if 'size' in rsp_json:
                 wor.storage_size = rsp_json['size']
                 if wor.storage_size == 0:
                     err_msg = ('Error: fid@%s is not exist.' % fid)
@@ -348,7 +348,7 @@ class WeedOperation(object):
         """
         try:
             src_file_rsp = self.crud_read(src_fid, fname=src_fname, just_url=False)
-            fp = StringIO.StringIO(src_file_rsp.content)
+            fp = io.StringIO(src_file_rsp.content)
             LOGGER.debug('Updating file: dst_fid: %s, src_fid: %s, src_fname: %s,  fp: %s' % (dst_fid, src_fid, src_fname, fp))
             return self.crud_update(fp, dst_fid, src_fname)
         except Exception as e:

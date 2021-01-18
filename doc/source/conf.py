@@ -49,8 +49,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'python-weed'
-copyright = u'2014, darkdarkfruit'
+project = 'python-weed'
+copyright = '2014, darkdarkfruit'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -202,8 +202,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  ('index', 'python-weed.tex', u'python-weed Documentation',
-   u'darkdarkfruit', 'manual'),
+  ('index', 'python-weed.tex', 'python-weed Documentation',
+   'darkdarkfruit', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -232,8 +232,8 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'python-weed', u'python-weed Documentation',
-     [u'darkdarkfruit'], 1)
+    ('index', 'python-weed', 'python-weed Documentation',
+     ['darkdarkfruit'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -246,8 +246,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'python-weed', u'python-weed Documentation',
-   u'darkdarkfruit', 'python-weed', 'One line description of project.',
+  ('index', 'python-weed', 'python-weed Documentation',
+   'darkdarkfruit', 'python-weed', 'One line description of project.',
    'Miscellaneous'),
 ]
 

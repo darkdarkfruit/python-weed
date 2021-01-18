@@ -43,10 +43,10 @@ __all__ = ['WeedMaster', 'WeedVolume']
 
 import json
 import random
-import StringIO
-import urlparse
+import io
+import urllib.parse
 import requests
-from conf import LOGGER
+from .conf import LOGGER
 
 
 class WeedAssignKey(dict):
@@ -70,7 +70,7 @@ class WeedAssignKey(dict):
                 LOGGER.error('Error for json.loads "%s".\nException: %s'
                              % (json_of_weed_response, e))
 
-        for k, v in self.items():
+        for k, v in list(self.items()):
             setattr(self, k, v)
         super(WeedAssignKey, self).__init__()
 
@@ -90,20 +90,20 @@ class WeedAssignKeyExtended(WeedAssignKey):
     '''
     def __init__(self, json_of_weed_response=None):
         super(WeedAssignKeyExtended, self).__init__(json_of_weed_response)
-        self['full_url'] = urlparse.urljoin('http://', self['url'])
-        self['full_publicUrl'] = urlparse.urljoin('http://', self['publicUrl'])
-        self['fid_full_url'] = urlparse.urljoin(self['full_url'], self['fid'])
-        self['fid_full_publicUrl'] = urlparse.urljoin(self['full_publicUrl'], self['fid'])
-        for k, v in self.items():
+        self['full_url'] = urllib.parse.urljoin('http://', self['url'])
+        self['full_publicUrl'] = urllib.parse.urljoin('http://', self['publicUrl'])
+        self['fid_full_url'] = urllib.parse.urljoin(self['full_url'], self['fid'])
+        self['fid_full_publicUrl'] = urllib.parse.urljoin(self['full_publicUrl'], self['fid'])
+        for k, v in list(self.items()):
             setattr(self, k, v)
 
 
     def update_full_urls(self):
         ''' update "full_url" and "full_publicUrl" '''
-        self['full_url'] = urlparse.urljoin('http://', self['url'])
-        self['full_publicUrl'] = urlparse.urljoin('http://', self['publicUrl'])
-        self['fid_full_url'] = urlparse.urljoin(self['full_url'], self['fid'])
-        self['fid_full_publicUrl'] = urlparse.urljoin(self['full_publicUrl'], self['fid'])
+        self['full_url'] = urllib.parse.urljoin('http://', self['url'])
+        self['full_publicUrl'] = urllib.parse.urljoin('http://', self['publicUrl'])
+        self['fid_full_url'] = urllib.parse.urljoin(self['full_url'], self['fid'])
+        self['fid_full_publicUrl'] = urllib.parse.urljoin(self['full_publicUrl'], self['fid'])
 
 
 
@@ -410,7 +410,7 @@ class WeedOperation(object):
         tmp_uploading_file_name = fname or 'a.unknown'
         rsp = requests.post(fid_full_url, files={'file' : (tmp_uploading_file_name, fp)})
         # LOGGER.debug(rsp.request.headers)
-        if not rsp.json().has_key('size'): # post new file fails
+        if 'size' not in rsp.json(): # post new file fails
             err_msg = 'Could not save file on weed-fs with fid_full_url: %s' % (fid_full_url)
             LOGGER.error(err_msg)
             return (False, err_msg)
@@ -489,7 +489,7 @@ class WeedOperation(object):
             LOGGER.debug('Deleting file: fid: %s, fname: %s, fid_full_url: %s' % (fid, fname, fid_full_url))
 
             r = requests.delete(fid_full_url)
-            if r.json().has_key('size'):
+            if 'size' in r.json():
                 return True
         except Exception as e:
             err_msg = 'Deleting file: fid: %s, fname: %s, fid_full_url: %s, e: %s' % (fid, fname, fid_full_url, e)
@@ -528,7 +528,7 @@ class WeedOperation(object):
         """
         try:
             src_file_rsp = self.read(src_fid, fname=src_fname, just_url=False)
-            fp = StringIO.StringIO(src_file_rsp.content)
+            fp = io.StringIO(src_file_rsp.content)
             LOGGER.debug('Updating file: dst_fid: %s, src_fid: %s, src_fname: %s,  fp: %s' % (dst_fid, src_fid, src_fname, fp))
             return self.update(fp, dst_fid, src_fname)
         except Exception as e:

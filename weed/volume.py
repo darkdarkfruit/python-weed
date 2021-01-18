@@ -31,14 +31,14 @@ python interface of weed-fs.
 '''
 
 
-from urlparse import urljoin, urlunparse, ParseResult
+from urllib.parse import urljoin, urlunparse, ParseResult
 
 __all__ = ['WeedVolume']
 
 import json
 import requests
 
-from conf import LOGGER
+from .conf import LOGGER
 
 
 
