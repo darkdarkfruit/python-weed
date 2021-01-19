@@ -8,11 +8,15 @@ python:
 #  - "3.9-dev"  # 3.9 development branch
 #  - "nightly"  # nightly build
 
+before_install:
+  - rm -rf linux_amd64.tar.gz weed
+
+
 # command to install dependencies
 install:
 #  - |
   - pip install -r requirements.txt
-  - rm -rf linux_amd64.tar.gz weed
+
 #  - pip install -e . > /dev/null 2>&1 &
 
 # command to run tests
