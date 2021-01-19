@@ -11,6 +11,7 @@ python:
 before_install:
   - rm -rf linux_amd64.tar.gz weed
   - whereis pytest
+  - python setup.py install
   - "export PYTHONPATH=$PYTHONPATH:$(pwd)"
 
 # command to install dependencies
