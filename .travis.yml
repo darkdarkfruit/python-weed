@@ -22,10 +22,6 @@ install:
     ./weed volume -dir="./data/volume2" -max=5  -mserver="localhost:9333" -port=27001 > weed_volume_2.log 2>&1 &
     ./weed filer -port=27100 -master="localhost:9333" > weed_filer.log 2>&1 &
     echo "started all weed services"
-#    pip install --upgrade pip
-#    pip install pytest
-#    if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    #        pip install -e . > /dev/null 2>&1 &
     echo "pwd is $(pwd)"
     ls -alh
   - pip install -r requirements.txt
