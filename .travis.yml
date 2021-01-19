@@ -10,6 +10,7 @@ python:
 
 before_install:
   - rm -rf linux_amd64.tar.gz weed
+  - whereis pytest
 
 
 # command to install dependencies
