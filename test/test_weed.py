@@ -121,18 +121,18 @@ def test_WeedMaster2():
     assert isinstance(wak, dict)
     assert 'fid' in wak
 
-    fid = wak.fid
+    fid = wak['fid']
 
     fids = [fid] + [fid + '_' + str(i + 1) for i in range(10)]
     locations = []
     for i in fids:
-        l = master.lookup(i)
-        assert 'locations' in l
-        locations.append(l)
+        locations_dict = master.lookup(i)
+        assert 'locations' in locations_dict
+        locations.append(locations_dict['locations'])
 
     for i, l in enumerate(locations):
-        if i < (len(locations) - 1):
-            assert locations[i] == locations[i + 1]
+        if i < (len(l) - 1):
+            assert l[i] == l[i + 1]
 
 
 def test_WeedVolume():
