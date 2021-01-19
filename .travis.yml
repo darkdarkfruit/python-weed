@@ -8,15 +8,17 @@ python:
 #  - "3.9-dev"  # 3.9 development branch
 #  - "nightly"  # nightly build
 
-
+before_install:
+  - rm -rf linux_amd64.tar.gz weed
+  - whereis pytest
+  - "export PYTHONPATH=$PYTHONPATH:$(pwd)"
 
 # command to install dependencies
 install:
   - pip install -r requirements.txt
 
-before_script:
-  - rm -rf linux_amd64.tar.gz weed
-  - whereis pytest
+#before_script:
+
 
 #  - pip install -e . > /dev/null 2>&1 &
 
