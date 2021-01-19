@@ -25,7 +25,6 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
-        sudo apt-get -y install wget tar
         rm -rf linux_amd64.tar.gz weed
         wget --quiet https://github.com/chrislusf/seaweedfs/releases/download/2.21/linux_amd64.tar.gz
         tar xf linux_amd64.tar.gz
@@ -56,6 +55,5 @@ jobs:
         echo $(whereis pytest)
         whereis python
         export PYTHONPATH=$PYTHONPATH:$(pwd)
-        python setup.py install
-        echo $(whereis pytest)
-        python -m pytest --import-mode=importlib .
+        echo "$PYTHONPATH"
+        python -m pytest ./
