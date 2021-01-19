@@ -43,7 +43,7 @@ note:
 try:
     import sys
     current_dir = __file__.rsplit('/', 1)[0]
-    parent_dir = current_dir.split('/', 1)[0]
+    parent_dir = current_dir.rsplit('/', 1)[0]
     print(f'current_dir: {current_dir}')
     print(f'parent_dir: {parent_dir}')
     if current_dir not in sys.path:
@@ -58,6 +58,7 @@ try:
 
 except Exception as e:
     pass
+
 
 import gzip
 import io
