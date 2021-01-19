@@ -57,6 +57,5 @@ jobs:
         whereis python
         export PYTHONPATH=$PYTHONPATH:$(pwd)
         python setup.py install
-#        python -m pip install pytest
         echo $(whereis pytest)
         python -m pytest --import-mode=importlib .

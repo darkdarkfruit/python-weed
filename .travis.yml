@@ -8,7 +8,9 @@ python:
 #  - "3.9-dev"  # 3.9 development branch
 #  - "nightly"  # nightly build
 
-before_install:
+
+# command to install dependencies
+install:
   - |
     rm -rf linux_amd64.tar.gz weed
     wget --quiet https://github.com/chrislusf/seaweedfs/releases/download/2.21/linux_amd64.tar.gz
@@ -26,17 +28,8 @@ before_install:
   - "export PYTHONPATH=$PYTHONPATH:$(pwd)"
   - echo $PYTHONPATH
   - python setup.py install # just install it
-
-
-# command to install dependencies
-install:
   - pip install -r requirements.txt
-
-#before_script:
-
-
-#  - pip install -e . > /dev/null 2>&1 &
 
 # command to run tests
 script:
-  - pytest
+  - pytest ./
