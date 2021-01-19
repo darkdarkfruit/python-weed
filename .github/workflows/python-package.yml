@@ -25,6 +25,15 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
+        apt-get -y install wget tar
+        wget https://github.com/chrislusf/seaweedfs/releases/download/2.21/linux_amd64.tar.gz
+        tar xf linux_amd64.tar.gz
+        chmod +x weed
+        mkdir data/volume1
+        ./weed master > /var/log/weed_master.log 2>&1 &
+        ./weed volume -dir="./data/volume1" -max=5  -mserver="localhost:9333" -port=27000 > weed_volume_1.log 2>&1 &
+        ./weed volume -dir="./data/volume2" -max=5  -mserver="localhost:9333" -port=27001 > weed_volume_2.log 2>&1 &
+        ./weed filer -port=27100 -master="localhost:9333" > weed_filer.log 2>&1 &
         python -m pip install --upgrade pip
         python -m pip install flake8 pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
