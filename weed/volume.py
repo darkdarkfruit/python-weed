@@ -1,27 +1,26 @@
 # ** -- coding: utf-8 -- **
-#!/usr/bin/env python
+# !/usr/bin/env python
 #
-#Copyright (c) 2011 darkdarkfruit <darkdarkfruit@gmail.com>
+# Copyright (c) 2011 darkdarkfruit <darkdarkfruit@gmail.com>
 #
-#Permission is hereby granted, free of charge, to any person obtaining a copy
-#of this software and associated documentation files (the "Software"), to deal
-#in the Software without restriction, including without limitation the rights
-#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-#copies of the Software, and to permit persons to whom the Software is
-#furnished to do so, subject to the following conditions:
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
 #
-#The above copyright notice and this permission notice shall be included in
-#all copies or substantial portions of the Software.
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
 #
-#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-#THE SOFTWARE.
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
 #
-
 
 
 '''
@@ -30,7 +29,6 @@ python interface of weed-fs.
 
 '''
 
-
 from urllib.parse import urljoin, urlunparse, ParseResult
 
 __all__ = ['WeedVolume']
@@ -38,8 +36,7 @@ __all__ = ['WeedVolume']
 import json
 import requests
 
-from .conf import LOGGER
-
+from .conf import g_logger
 
 
 class WeedVolume(object):
@@ -47,22 +44,17 @@ class WeedVolume(object):
       Weed-FS's volume server(relative to master-server)
     """
 
-    def __init__(self, host='127.0.0.1', port=27000):
+    def __init__(self, url_base='http://localhost:27000'):
         """
 
         Arguments:
-        - `host`: defaults to '127.0.0.1'
-        - `port`: defaults to 27000
+        - `url_base`: defaults to 'http://localhost:27000'
+        :param url_base:
         """
-        self.host = host
-        self.port = port
-        self.url_base_parts = ParseResult(scheme='http', netloc='%s:%d' % (host, port),
-            path='', params='', query='', fragment='')
-        self.url_base = urlunparse(self.url_base_parts)
+        self.url_base = url_base
         self.url_status = urljoin(self.url_base, '/status')
 
-
-    def get_status(self):
+    def get_status(self) -> None or {}:
         """
         get status of this volume
 
@@ -73,12 +65,11 @@ class WeedVolume(object):
         try:
             result = json.loads(r.content)
         except Exception as e:
-            LOGGER.error("Could not get status of this volume: %s. Exception is: %s" % (self.url_status, e))
+            g_logger.error("Could not get status of this volume: %s. Exception is: %s" % (self.url_status, e))
             result = None
         return result
 
-
-    def put_file(self, absolute_file_path, fid, headers=None):
+    def put_file(self, absolute_file_path, fid, headers=None) -> None or {}:
         ''' you can put exact http-headers in @headers to help weed to clarify putting file.
 
         eg:
@@ -93,27 +84,26 @@ class WeedVolume(object):
         '''
         url = urljoin(self.url_base, fid)
         if headers and isinstance(headers, dict):
-            files = {'file': (open(absolute_file_path, 'rb')), 'headers' : headers}
+            files = {'file': (open(absolute_file_path, 'rb')), 'headers': headers}
         else:
             files = {'file': (open(absolute_file_path, 'rb'))}
         try:
             r = requests.post(url, files=files)
         except Exception as e:
-            LOGGER.error("Could not post file. Exception is: %s" % e)
+            g_logger.error("Could not post file. Exception is: %s" % e)
             return None
 
         # weed-fs returns a 200 but the content may contain an error
         result = json.loads(r.content)
         if r.status_code == 200:
             if 'error' in result:
-                LOGGER.error(result['error'])
+                g_logger.error(result['error'])
             else:
-                LOGGER.debug(result)
+                g_logger.debug(result)
 
         return result
 
-
-    def get_file(self, fid):
+    def get_file(self, fid) -> bytes or None:
         ''' Get a file's content by @fid
 
         Deprecated.
@@ -124,17 +114,18 @@ class WeedVolume(object):
         try:
             r = requests.get(url)
         except Exception as e:
-            LOGGER.error("Could not get file. Exception is: %s" % e)
+            g_logger.error("Could not get file. Exception is: %s" % e)
+            return None
 
         if r.status_code == 200:
             return r.content
         elif r.status_code == 404:
-            LOGGER.error("File with fid %s not found" % fid)
+            g_logger.error("File with fid %s not found" % fid)
             return None
         else:
             return None
 
-    def delete_file(self, fid):
+    def delete_file(self, fid) -> bytes or None:
         ''' Delete a file by @fid
 
         Deprecated.
@@ -145,9 +136,10 @@ class WeedVolume(object):
         try:
             r = requests.delete(url)
         except Exception as e:
-            LOGGER.error("Could not delete file. Exception is: %s" % e)
+            g_logger.error("Could not delete file. Exception is: %s" % e)
+            return None
 
         return r.content
 
     def __repr__(self):
-        return "<WeedVolume: %s:%s>" % (self.host, self.port)
+        return f"<WeedVolume: {self.url_base}>"

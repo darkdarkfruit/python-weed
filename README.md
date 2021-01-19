@@ -8,9 +8,12 @@ A python module for seaweedfs(https://github.com/chrislusf/seaweedfs.git)
 Python version
 ===============
 
-* python3.6+ (python3.6+ supports F-Strings: https://www.python.org/dev/peps/pep-0498/)
+* python3.7+ 
 * Note: For old python2.7 version, use the branch: `v0.2.3-suited-for-python2.7` or use tag: `python2.7`(or `v0.2.3`) of master
-* Note: We always refer python to python3.6+(also, pip to pip3) in the doc as python2 has been deprecated.
+* Note: We always refer python to python3.7+(also, pip to pip3) in the doc as python2 has been deprecated.
+* Info: 
+    * python3.6+ supports F-Strings: https://www.python.org/dev/peps/pep-0498/
+    * python3.7 supports dataclass
 
 Async support?
 ==============

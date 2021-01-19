@@ -35,9 +35,9 @@ Then, run
 note:
     ensure weed master-server and at least one volume-server are up
     default:
-        master-server: 127.0.0.1:9333
-        volume-server: 127.0.0.1:27000
-        filer-server : 127.0.0.1:27100
+        master-server: localhost:9333
+        volume-server: localhost:27000
+        filer-server : localhost:27100
 
 '''
 import gzip
@@ -60,7 +60,7 @@ from weed.filer import WeedFiler
 
 set_global_logger_level(logging.DEBUG)
 
-WEED_MASTER_IP = '127.0.0.1'
+WEED_MASTER_IP = 'localhost'
 WEED_MASTER_PORT = 9333
 
 
@@ -145,7 +145,7 @@ def test_WeedAssignKeyExtended():
 
 def test_WeedOperationResponse():
     wor = WeedOperationResponse()
-    assert wor
+    assert wor.status == Status.FAILED # init is FAILED
     assert wor.__repr__()
 
 
@@ -172,7 +172,7 @@ def test_volume_put_get_delete_file():
     volume_url = 'http://' + locations_list[0]['publicUrl']
     url = parse.urlparse(volume_url)
 
-    #volume = WeedVolume(host=url.hostname, port=url.port)
+    #volume = WeedVolume(host=url_base.hostname, port=url_base.port)
     volume = master.get_volume(fid)
     status_dict = volume.get_status()
     assert isinstance(status_dict, dict)
@@ -218,9 +218,9 @@ def test_accquire_new_fid():
 def test_put_a_file_with_fid():
     op = WeedOperation()
     fid = op.acquire_new_fids()[0]
-    fname = 'test_opensource_logo.jpg'
-    fpath = os.path.join(TEST_PATH, fname)
-    assert op.put(open(fpath, 'r'), fid, fname)
+    file_name = 'test_opensource_logo.jpg'
+    fpath = os.path.join(TEST_PATH, file_name)
+    assert op.put(open(fpath, 'rb'), fid, file_name)
 
 
 
@@ -228,25 +228,26 @@ def test_put_file():
     # test put_file in weed.util
     op = WeedOperation()
     fid = ''
-    fname = 'test_opensource_logo.jpg'
-    fpath = os.path.join(TEST_PATH, fname)
+    file_name = 'test_opensource_logo.jpg'
+    fpath = os.path.join(TEST_PATH, file_name)
     master = WeedMaster()
     fid_full_url = master.acquire_new_assign_key()['fid_full_url']
     print(('test_weed.py, fid_full_url: %s, fpath: %s' % (fid_full_url, fpath)))
     with open(fpath, 'rb') as f:
-        LOGGER.info('fp position: %d' % f.tell())
-        LOGGER.info('fp info: length: %d' % len(f.read()))
+        g_logger.info('fp position: %d' % f.tell())
+        g_logger.info('fp info: length: %d' % len(f.read()))
         f.seek(0)
 
-        rsp = put_file(f, fid_full_url, fname)
-        assert rsp
-        assert rsp.status == 'success'
-        assert 'url' in rsp and rsp.url
+        rsp = put_file(f, fid_full_url, file_name)
+        assert rsp.ok()
         assert rsp.storage_size > 0
         fid = os.path.split(fid_full_url)[1]
 
     # read
-    content = op.crud_read(fid, fname).content
+    wor = op.crud_read(fid, file_name)
+    assert wor
+    content = wor.content
+    assert len(content) > 3
     with open(fpath, 'rb') as _:
         original_content = _.read()
     assert content == original_content
@@ -259,19 +260,19 @@ def test_file_operations():
 
     # create
     fid = ''
-    fname = 'test_opensource_logo.jpg'
-    fpath = os.path.join(TEST_PATH, fname)
+    file_name = 'test_opensource_logo.jpg'
+    fpath = os.path.join(TEST_PATH, file_name)
     with open(fpath, 'rb') as f:
-        rsp = op.crud_create(f, fname)
-        assert rsp
-        assert 'fid' in rsp
-        fid = rsp['fid']
+        rsp = op.crud_create(f, file_name)
+        assert rsp.ok()
+        assert len(rsp.fid) > 3
+        fid = rsp.fid
         print(fid)
         assert len(fid) > 1
         assert os.path.split(op.get_fid_full_url(fid))[1] == fid
-        assert rsp['fid'].replace(',', '') > '01'
-        assert rsp['url']
-        assert rsp['storage_size'] > 0
+        assert rsp.fid.replace(',', '') > '01'
+        assert rsp.url
+        assert rsp.storage_size > 0
 
     # test exists
     assert op.exists(fid)
@@ -281,8 +282,8 @@ def test_file_operations():
 
 
     # read
-    content = op.get(fid, fname).content
-    content2 = op.get_content(fid, fname)
+    content = op.get(fid, file_name).content
+    content2 = op.get_content(fid, file_name)
     assert content == content2
     with open(fpath, 'rb') as f:
         original_content = f.read()
@@ -296,12 +297,11 @@ def test_file_operations():
         tmp_file.seek(0)
         rsp = op.crud_update(tmp_file, fid)
         assert rsp
-        assert 'fid' in rsp
-        fid_2 = rsp['fid']
+        fid_2 = rsp.fid
         assert fid_2 == fid
-        assert rsp['fid'].replace(',', '') > '01'
-        assert rsp['url']
-        assert rsp['storage_size'] > 0
+        assert rsp.fid.replace(',', '') > '01'
+        assert rsp.url
+        assert rsp.storage_size > 0
 
     # delete
     rsp = op.crud_delete(fid)
@@ -312,10 +312,8 @@ def test_file_operations():
 
 def test_WeedFiler():
     wf = WeedFiler()
-    assert wf.host == '127.0.0.1'
-    assert wf.port == 27100
-    assert wf.uri == '127.0.0.1:27100'
-    assert wf.url == 'http://127.0.0.1:27100'
+    assert wf.uri == 'localhost:27100'
+    assert wf.url_base == 'http://localhost:27100'
 
     d = '/test/'
     new_d = '/test/new_dir/'
@@ -346,19 +344,19 @@ def test_WeedFiler():
         assert j['Path'] == '/test/new_dir'
     assert j['Entries']
     entries = j['Entries']
-    fnames = []
+    file_names = []
     for f in entries:
         if 'FullPath' in f:
-            fnames.append(f['FullPath'].split('/')[-1])
+            file_names.append(f['FullPath'].split('/')[-1])
 
-    assert 'hello.txt' in fnames
+    assert 'hello.txt' in file_names
 
     # get f1
     wf_get = wf.get(f1_path)
     assert int(wf_get['content_length']) > 0
     if 'gzip' in wf_get['content_type']:
         content_gz = wf_get['content']
-        content = gzip.open(io.StringIO(content_gz)).read()
+        content = gzip.open(io.BytesIO(content_gz)).read()
         assert content == f1_content
     elif 'text' in wf_get['content_type']:
         assert wf_get['content'] == str.encode(f1_content)

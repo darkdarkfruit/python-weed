@@ -1,27 +1,26 @@
 # ** -- coding: utf-8 -- **
-#!/usr/bin/env python
+# !/usr/bin/env python
 #
-#Copyright (c) 2011 darkdarkfruit <darkdarkfruit@gmail.com>
+# Copyright (c) 2011 darkdarkfruit <darkdarkfruit@gmail.com>
 #
-#Permission is hereby granted, free of charge, to any person obtaining a copy
-#of this software and associated documentation files (the "Software"), to deal
-#in the Software without restriction, including without limitation the rights
-#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-#copies of the Software, and to permit persons to whom the Software is
-#furnished to do so, subject to the following conditions:
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
 #
-#The above copyright notice and this permission notice shall be included in
-#all copies or substantial portions of the Software.
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
 #
-#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-#THE SOFTWARE.
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
 #
-
 
 
 '''
@@ -41,7 +40,6 @@ from urllib.parse import urljoin, urlunparse, ParseResult
 
 __all__ = ['WeedMaster']
 
-
 import time
 import json
 import urllib.parse
@@ -57,21 +55,15 @@ class WeedMaster(object):
     Weed-FS's master server (relative to volume-server)
     """
 
-    def __init__(self, scheme='http', host='127.0.0.1', port=9333, prefetch_volumeIds=False):
+    def __init__(self, url_base='http://localhost:9333', prefetch_volume_ids=False):
         """
 
         Arguments:
-        - `host`:
-        - `port`:
-        - `prefetch_volumeIds`: if True, prefech volumeIds to cache: self.volumes_cache
-        :param scheme:
+        - `url_base`: default: 'http://localhost:9333'
+        - `prefetch_volume_ids`: if True, prefech volumeIds to cache: self.volumes_cache
+        :param url_base:
         """
-        self.host = host
-        self.port = port
-        # self.url_base_parts = ParseResult(scheme='http', netloc='%s:%d' % (host, port),
-        #                                   path='', params='', query='', fragment='')
-        # self.url_base = urlunparse(self.url_base_parts)
-        self.url_base = f'{scheme}://{host}:{port}'
+        self.url_base = url_base
         self.url_assign = urljoin(self.url_base, '/dir/assign')
         self.url_lookup = urljoin(self.url_base, '/dir/lookup')
         self.url_vacuum = urljoin(self.url_base, '/vol/vacuum')
@@ -80,18 +72,17 @@ class WeedMaster(object):
         # volumes usually do not move, so we cache it here for 1 minute.
         self.volumes_cache = {}
 
-        if prefetch_volumeIds:
-            LOGGER.info("prefetching volumeIds(['1' : '10'] into cache")
+        if prefetch_volume_ids:
+            g_logger.info("prefetching volumeIds(['1' : '10'] into cache")
             for i in range(10):
                 self.lookup(str(i + 1))
 
-
-    def acquire_assign_info(self):
+    def acquire_assign_info(self) -> None or {}:
         """
         acquire an assign key from master-server.
         assign_key is in json format like below:
         -----------
-        {"count":1,"fid":"3,01637037d6","url":"127.0.0.1:8080","publicUrl":"localhost:8080"}
+        {"count":1,"fid":"3,01637037d6","url_base":"127.0.0.1:8080","publicUrl":"localhost:8080"}
         -----------
 
         Arguments:
@@ -101,18 +92,16 @@ class WeedMaster(object):
             r = requests.get(self.url_assign)
             result = json.loads(r.content)
         except Exception as e:
-            LOGGER.error('Could not get status of this volume: %s. Exception is: %s'
-                         % (self.url_status, e))
+            g_logger.error('Could not get status of this volume: %s. Exception is: %s'
+                           % (self.url_status, e))
             result = None
         return result
 
-
-    def get_assign_key(self):
+    def get_assign_key(self) -> None or {}:
         ''' deprecated. Please use acquie_new_assign_key function instead '''
         return self.acquire_assign_info()
 
-
-    def acquire_new_assign_key(self, count=1):
+    def acquire_new_assign_key(self, count=1) -> None or WeedAssignKeyExtended:
         """
         get a new avalable new volume-file-location from from weed-master by getting a new-assign-key
         Arguments:
@@ -120,12 +109,12 @@ class WeedMaster(object):
 
         assign_key is in json format like below:
         -----------
-        {"count":1,"fid":"3,01637037d6","url":"127.0.0.1:8080","publicUrl":"localhost:8080"}
+        {"count":1,"fid":"3,01637037d6","url_base":"127.0.0.1:8080","publicUrl":"localhost:8080"}
         -----------
 
         return a tuple(dst_file_fid, dst_volume_url) like below:
         ----------
-        (dst_file_fid, http://{volume-url})
+        (dst_file_fid, http://{volume-url_base})
         (3,20392030920, http://127.0.0.1:8080)
         ----------
 
@@ -134,8 +123,10 @@ class WeedMaster(object):
         dst_volume_url = None
         wak = WeedAssignKeyExtended()
         try:
-            LOGGER.debug('Getting new dst_volume_url with master-assign-key-url: %s' % assign_key_url)
+            g_logger.debug('Getting new dst_volume_url with master-assign-key-url_base: %s' % assign_key_url)
             r = requests.get(assign_key_url)
+            # key_dict sample:
+            # {'fid': '2,02b47f02c9e3', 'url': '192.168.1.102:27001', 'publicUrl': '192.168.1.102:27001', 'count': 10}
             key_dict = json.loads(r.content)
             # print(key_dict)
             wak.update(key_dict)
@@ -143,14 +134,14 @@ class WeedMaster(object):
             wak.update_full_urls()
             # print(wak)
 
-            LOGGER.info('Successfuly got weed_assign_key(wak): %s' % wak)
+            g_logger.info('Successfuly got weed_assign_key(wak): %s' % wak)
         except Exception as e:
-            LOGGER.error('Could not get new assign key from the assign url: %s. Exception is: %s'
-                         % (assign_key_url, e))
+            g_logger.error('Could not get new assign key from the assign url_base: %s. Exception is: %s'
+                           % (assign_key_url, e))
+            return None
         return wak
 
-
-    def lookup(self, volume_id_or_fid, cache_duration_in_seconds=VOLUME_CACHE_DURATION_IN_SECONDS):
+    def lookup(self, volume_id_or_fid, cache_duration_in_seconds=g_volume_cache_duration_in_seconds) -> None or {}:
         """
         lookup the locations of a volume@volume_id_or_fid.
         returns a dict like below if successful else None:
@@ -159,7 +150,7 @@ class WeedMaster(object):
           "locations": [
             {
               "publicUrl": "localhost:8080",
-              "url": "localhost:8080"
+              "url_base": "localhost:8080"
             }
           ]
         }
@@ -176,32 +167,32 @@ class WeedMaster(object):
             _volume_id = volume_id_or_fid
         result = None
         try:
-            # LOGGER.warning('id(master): %x, cache should be hit: %s' % (id(self), self.volumes_cache.has_key(_volume_id)))
-            # LOGGER.warning('self.volumes_cache: %s' % self.volumes_cache)
+            # g_logger.warning('id(master): %x, cache should be hit: %s' % (id(self), self.volumes_cache.has_key(_volume_id)))
+            # g_logger.warning('self.volumes_cache: %s' % self.volumes_cache)
             ## try cache first
-            if _volume_id in self.volumes_cache and (time.time() - self.volumes_cache[_volume_id][1]) <= cache_duration_in_seconds:
-                LOGGER.debug('volume_cache(lookup by volume_id) hits')
+            if _volume_id in self.volumes_cache and (
+                    time.time() - self.volumes_cache[_volume_id][1]) <= cache_duration_in_seconds:
+                g_logger.debug('volume_cache(lookup by volume_id) hits')
                 return self.volumes_cache[_volume_id][0]
             else:
                 r = requests.get(self.url_lookup + '?volumeId=%s' % _volume_id)
-                if not r.ok:    # not HTTP-200, like HTTP-404, ...
+                if not r.ok:  # not HTTP-200, like HTTP-404, ...
                     return None
                 result = json.loads(r.content)
 
                 ## refresh cache
-                self.volumes_cache.update({_volume_id : (result, time.time())})
-                # LOGGER.warning('volume_cache(lookup by volume_id) not hit, dst: %s, keys: %s' % (_volume_id, self.volumes_cache.keys())
+                self.volumes_cache.update({_volume_id: (result, time.time())})
+                # g_logger.warning('volume_cache(lookup by volume_id) not hit, dst: %s, keys: %s' % (_volume_id, self.volumes_cache.keys())
 
-            # LOGGER.warning('after updating, self.volumes_cache: %s' % self.volumes_cache)
+            # g_logger.warning('after updating, self.volumes_cache: %s' % self.volumes_cache)
 
         except Exception as e:
-            LOGGER.error("Could not get status of this volume: %s. "
-                "Exception is: %s" % (self.url_status, e))
+            g_logger.error("Could not get status of this volume: %s. "
+                           "Exception is: %s" % (self.url_status, e))
             result = None
         return result
 
-
-    def get_volume(self, fid):
+    def get_volume(self, fid) -> WeedVolume or None:
         ''' get an instance of WeedVolume by @fid'''
         lookup_dict = self.lookup(fid)
         if 'locations' in lookup_dict:
@@ -209,13 +200,12 @@ class WeedMaster(object):
         else:
             return None
 
-        url_parts = ParseResult(scheme='http', netloc=locations_list[0]['publicUrl'],
-            path='', params='', query='', fragment='')
-        volume = WeedVolume(host=url_parts.hostname, port=url_parts.port)
+        selected_location = locations_list[0]
+        public_url = selected_location['publicUrl']
+        volume = WeedVolume(url_base=f"http://{public_url}")
         return volume
 
-
-    def vacuum(self):
+    def vacuum(self) -> {}:
         """
         Force Garbage Collection
 
@@ -277,7 +267,7 @@ class WeedMaster(object):
                   "locations": [
                     {
                       "publicUrl": "localhost:8080",
-                      "url": "localhost:8080"
+                      "url_base": "localhost:8080"
                     }
                   ]
                 }
@@ -290,12 +280,12 @@ class WeedMaster(object):
             r = requests.get(self.url_vacuum)
             result = json.loads(r.content)
         except Exception as e:
-            LOGGER.error("Could not get status of this volume: %s. "
-                "Exception is: %s" % (self.url_status, e))
+            g_logger.error("Could not get status of this volume: %s. "
+                           "Exception is: %s" % (self.url_status, e))
             result = None
         return result
 
-    def get_status(self):
+    def get_status(self) -> {}:
         """
         get status of this volume
 
@@ -306,11 +296,9 @@ class WeedMaster(object):
             r = requests.get(self.url_status)
             result = json.loads(r.content)
         except Exception as e:
-            LOGGER.error('Could not get status of this volume: %s. Exception is: %s' % (self.url_status, e))
+            g_logger.error('Could not get status of this volume: %s. Exception is: %s' % (self.url_status, e))
             result = None
         return result
 
-
     def __repr__(self):
-        return '<WeedMaster: %s:%s>' % (self.host, self.port)
-
+        return f'<WeedMaster: {self.url_base}>'

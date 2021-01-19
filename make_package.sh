@@ -1,4 +1,5 @@
 #!/bin/sh
+python=python3
 echo '** 1. ********* run tests first *******************************'
 py.test weed
 echo '*********** running tests ends  *******************************'

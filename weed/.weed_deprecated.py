@@ -46,20 +46,20 @@ import random
 import io
 import urllib.parse
 import requests
-from .conf import LOGGER
+from .conf import g_logger
 
 
 class WeedAssignKey(dict):
     ''' represent this json in dict and object:
 
-    {"count":1,"fid":"3,01637037d6","url":"127.0.0.1:8080","publicUrl":"localhost:8080"}
+    {"count":1,"fid":"3,01637037d6","url_base":"127.0.0.1:8080","publicUrl":"localhost:8080"}
 
     '''
     def __init__(self, json_of_weed_response=None):
 
         self['fid'] = ''
         self['count'] = 0
-        self['url'] = ''
+        self['url_base'] = ''
         self['publicUrl'] = ''
 
         if json_of_weed_response:
@@ -67,8 +67,8 @@ class WeedAssignKey(dict):
                 d = json.loads(json_of_weed_response)
                 self.update(d)
             except Exception as e:
-                LOGGER.error('Error for json.loads "%s".\nException: %s'
-                             % (json_of_weed_response, e))
+                g_logger.error('Error for json.loads "%s".\nException: %s'
+                               % (json_of_weed_response, e))
 
         for k, v in list(self.items()):
             setattr(self, k, v)
@@ -82,7 +82,7 @@ class WeedAssignKeyExtended(WeedAssignKey):
       'full_url', 'full_public_url', 'fid_full_url', 'fid_full_publicUrl':
 
       represents:
-        self['full_url'] = 'http://' + self['url']
+        self['full_url'] = 'http://' + self['url_base']
         self['full_publicUrl'] = 'http://' + self['publicUrl']
         self['fid_full_url'] = self['full_url'] + '/' + self['fid']
         self['fid_full_publicUrl'] = self['full_publicUrl'] + '/' + self['fid']
@@ -90,7 +90,7 @@ class WeedAssignKeyExtended(WeedAssignKey):
     '''
     def __init__(self, json_of_weed_response=None):
         super(WeedAssignKeyExtended, self).__init__(json_of_weed_response)
-        self['full_url'] = urllib.parse.urljoin('http://', self['url'])
+        self['full_url'] = urllib.parse.urljoin('http://', self['url_base'])
         self['full_publicUrl'] = urllib.parse.urljoin('http://', self['publicUrl'])
         self['fid_full_url'] = urllib.parse.urljoin(self['full_url'], self['fid'])
         self['fid_full_publicUrl'] = urllib.parse.urljoin(self['full_publicUrl'], self['fid'])
@@ -100,7 +100,7 @@ class WeedAssignKeyExtended(WeedAssignKey):
 
     def update_full_urls(self):
         ''' update "full_url" and "full_publicUrl" '''
-        self['full_url'] = urllib.parse.urljoin('http://', self['url'])
+        self['full_url'] = urllib.parse.urljoin('http://', self['url_base'])
         self['full_publicUrl'] = urllib.parse.urljoin('http://', self['publicUrl'])
         self['fid_full_url'] = urllib.parse.urljoin(self['full_url'], self['fid'])
         self['fid_full_publicUrl'] = urllib.parse.urljoin(self['full_publicUrl'], self['fid'])
@@ -133,7 +133,7 @@ class WeedMaster(object):
         acquire an assign key from master-server.
         assign_key is in json format like below:
         -----------
-        {"count":1,"fid":"3,01637037d6","url":"127.0.0.1:8080","publicUrl":"localhost:8080"}
+        {"count":1,"fid":"3,01637037d6","url_base":"127.0.0.1:8080","publicUrl":"localhost:8080"}
         -----------
 
         Arguments:
@@ -144,8 +144,8 @@ class WeedMaster(object):
             r = requests.get(self.url_assign)
             result = json.loads(r.content)
         except Exception as e:
-            LOGGER.error('Could not get status of this volume: %s. Exception is: %s'
-                         % (self.url_status, e))
+            g_logger.error('Could not get status of this volume: %s. Exception is: %s'
+                           % (self.url_status, e))
             result = None
         return result
 
@@ -158,12 +158,12 @@ class WeedMaster(object):
 
         assign_key is in json format like below:
         -----------
-        {"count":1,"fid":"3,01637037d6","url":"127.0.0.1:8080","publicUrl":"localhost:8080"}
+        {"count":1,"fid":"3,01637037d6","url_base":"127.0.0.1:8080","publicUrl":"localhost:8080"}
         -----------
 
         return a tuple(dst_file_fid, dst_volume_url) like below:
         ----------
-        (dst_file_fid, http://{volume-url})
+        (dst_file_fid, http://{volume-url_base})
         (3,20392030920, http://127.0.0.1:8080)
         ----------
 
@@ -172,17 +172,17 @@ class WeedMaster(object):
         dst_volume_url = None
         wak = WeedAssignKeyExtended()
         try:
-            LOGGER.debug('Getting new dst_volume_url with master-assign-key-url: %s' % assign_key_url)
+            g_logger.debug('Getting new dst_volume_url with master-assign-key-url_base: %s' % assign_key_url)
             r = requests.get(assign_key_url)
             key_dict = json.loads(r.content)
 
             wak.update(key_dict)
             wak.update_full_urls()
 
-            LOGGER.info('Successfuly got dst_volume_url: %s' % dst_volume_url)
+            g_logger.info('Successfuly got dst_volume_url: %s' % dst_volume_url)
         except Exception as e:
-            LOGGER.error('Could not get new assign key from the assign url: %s. Exception is: %s'
-                         % (assign_key_url, e))
+            g_logger.error('Could not get new assign key from the assign url_base: %s. Exception is: %s'
+                           % (assign_key_url, e))
         return wak
 
 
@@ -196,7 +196,7 @@ class WeedMaster(object):
           "locations": [
             {
               "publicUrl": "localhost:8080",
-              "url": "localhost:8080"
+              "url_base": "localhost:8080"
             }
           ]
         }
@@ -210,7 +210,7 @@ class WeedMaster(object):
             r = requests.get(self.url_lookup + '?volumeId=%s' % volume_id)
             result = json.loads(r.content)
         except Exception as e:
-            LOGGER.error('Could not get status of this volume: %s. Exception is: %s' % (self.url_status, e))
+            g_logger.error('Could not get status of this volume: %s. Exception is: %s' % (self.url_status, e))
             result = None
         return result
 
@@ -273,7 +273,7 @@ class WeedMaster(object):
                   "locations": [
                     {
                       "publicUrl": "localhost:8080",
-                      "url": "localhost:8080"
+                      "url_base": "localhost:8080"
                     }
                   ]
                 }
@@ -287,7 +287,7 @@ class WeedMaster(object):
             r = requests.get(self.url_vacuum)
             result = json.loads(r.content)
         except Exception as e:
-            LOGGER.error('Could not get status of this volume: %s. Exception is: %s' % (self.url_status, e))
+            g_logger.error('Could not get status of this volume: %s. Exception is: %s' % (self.url_status, e))
             result = None
         return result
 
@@ -304,7 +304,7 @@ class WeedMaster(object):
             r = requests.get(self.url_status)
             result = json.loads(r.content)
         except Exception as e:
-            LOGGER.error('Could not get status of this volume: %s. Exception is: %s' % (self.url_status, e))
+            g_logger.error('Could not get status of this volume: %s. Exception is: %s' % (self.url_status, e))
             result = None
         return result
 
@@ -343,7 +343,7 @@ class WeedVolume(object):
         try:
             result = json.loads(r.content)
         except Exception as e:
-            LOGGER.error('Could not get status of this volume: %s. Exception is: %s' % (self.url_status, e))
+            g_logger.error('Could not get status of this volume: %s. Exception is: %s' % (self.url_status, e))
             result = None
         return result
 
@@ -374,7 +374,7 @@ class WeedOperation(object):
           "locations": [
             {
               "publicUrl": "localhost:8080",
-              "url": "localhost:8080"
+              "url_base": "localhost:8080"
             }
           ]
         }
@@ -388,35 +388,35 @@ class WeedOperation(object):
         try:
             r = self.master.lookup(volume_id)
             # _url = WEEDFS_MASTER_URL + '/dir/lookup?volumeId=%s' % volume_id
-            # LOGGER.debug('lookup volume by url: %s' % _url)
+            # g_logger.debug('lookup volume by url_base: %s' % _url)
             # r = requests.get(_url)
             result = json.loads(r.content)
             locations = result['locations']
 
             # choose a random location
             location = locations[random.randint(0, len(locations) - 1)]
-            full_url = 'http://%s/%s' % (location['url'], fid)
+            full_url = 'http://%s/%s' % (location['url_base'], fid)
         except Exception as e:
-            LOGGER.error('Could not get volume location of this fid: %s. Exception is: %s' % (fid, e))
+            g_logger.error('Could not get volume location of this fid: %s. Exception is: %s' % (fid, e))
             result = None
         return full_url
 
 
     @staticmethod
-    def save_file_to_weed(self, fp, fid_full_url, fname=''):
+    def save_file_to_weed(self, fp, fid_full_url, file_name=''):
         """
         save fp(file-pointer, file-description) to remote weed
         """
-        tmp_uploading_file_name = fname or 'a.unknown'
+        tmp_uploading_file_name = file_name or 'a.unknown'
         rsp = requests.post(fid_full_url, files={'file' : (tmp_uploading_file_name, fp)})
-        # LOGGER.debug(rsp.request.headers)
+        # g_logger.debug(rsp.request.headers)
         if 'size' not in rsp.json(): # post new file fails
             err_msg = 'Could not save file on weed-fs with fid_full_url: %s' % (fid_full_url)
-            LOGGER.error(err_msg)
+            g_logger.error(err_msg)
             return (False, err_msg)
         data = {
             'fid_full_url' : fid_full_url,
-            'fname' : fname,
+            'file_name' : file_name,
             'storage_size' : rsp.json().get('size', 0),
             }
         return (True, data)
@@ -425,75 +425,75 @@ class WeedOperation(object):
     ## -----------------------------------------------------------
     ##    weedfs operation: CRUD starts
     ## -----------------------------------------------------------
-    def create(self, fp, fname=''):
+    def create(self, fp, file_name=''):
         """
         create a file in weed-fs with @fid
         """
         fid_full_url = 'wrong_url'
         try:
             wak = self.master.acquire_new_assign_key()
-            LOGGER.debug('Creating file: fp: %s, fname: %s, fid_full_url: %s'
-                         % (fp, fname, fid_full_url))
-            return WeedOperation.save_file_to_weed(fp, wak.fid_full_url, fname)
+            g_logger.debug('Creating file: fp: %s, file_name: %s, fid_full_url: %s'
+                           % (fp, file_name, fid_full_url))
+            return WeedOperation.save_file_to_weed(fp, wak.fid_full_url, file_name)
         except Exception as e:
-            err_msg = 'Could not create file: fp: %s, fname: %s, fid_full_url: %s, e: %s' % (fp, fname, fid_full_url, e)
-            LOGGER.error(err_msg)
+            err_msg = 'Could not create file: fp: %s, file_name: %s, fid_full_url: %s, e: %s' % (fp, file_name, fid_full_url, e)
+            g_logger.error(err_msg)
             return None
 
 
-    def read(self, fid, fname='', just_url=True):
+    def read(self, fid, file_name='', just_url=True):
         """
         read/get a file from weed-fs with @fid.
 
         @just_url:
-          True -> just return fid_full_url (web-servers/browsers like nginx, chrome can get resource by this url)
+          True -> just return fid_full_url (web-servers/browsers like nginx, chrome can get resource by this url_base)
           False -> return a http response of requests(package requests).
         """
         fid_full_url = 'wrong_url'
         try:
             fid_full_url = self.get_fid_full_url(fid)
-            LOGGER.debug('Reading file(just_url:%s): fid: %s, fname: %s, fid_full_url: %s' % (just_url, fid, fname, fid_full_url))
+            g_logger.debug('Reading file(just_url:%s): fid: %s, file_name: %s, fid_full_url: %s' % (just_url, fid, file_name, fid_full_url))
             if just_url:
                 return fid_full_url
             else:
                 rsp = requests.get(fid_full_url)
                 return rsp
         except Exception as e:
-            err_msg = 'Could not read file(just_url:%s): fid: %s, fname: %s, fid_full_url: %s, e: %s' % (just_url, fid, fname, fid_full_url, e)
-            LOGGER.error(err_msg)
+            err_msg = 'Could not read file(just_url:%s): fid: %s, file_name: %s, fid_full_url: %s, e: %s' % (just_url, fid, file_name, fid_full_url, e)
+            g_logger.error(err_msg)
             return None
 
 
-    def update(self, fp, fid, fname=''):
+    def update(self, fp, fid, file_name=''):
         """
         update a file in weed-fs with @fid
         """
         fid_full_url = 'wrong_url'
         try:
             fid_full_url = self.get_fid_full_url(fid)
-            LOGGER.debug('Updating file: fp: %s, fname: %s, fid_full_url: %s' % (fp, fname, fid_full_url))
-            return WeedOperation.save_file_to_weed(fp, fid_full_url, fname)
+            g_logger.debug('Updating file: fp: %s, file_name: %s, fid_full_url: %s' % (fp, file_name, fid_full_url))
+            return WeedOperation.save_file_to_weed(fp, fid_full_url, file_name)
         except Exception as e:
-            err_msg = 'Could not Updating file: fp: %s, fname: %s, fid_full_url: %s, e: %s' % (fp, fname, fid_full_url, e)
-            LOGGER.error(err_msg)
+            err_msg = 'Could not Updating file: fp: %s, file_name: %s, fid_full_url: %s, e: %s' % (fp, file_name, fid_full_url, e)
+            g_logger.error(err_msg)
             return None
 
 
-    def delete(self, fid, fname=''):
+    def delete(self, fid, file_name=''):
         """
         delete a file in weed-fs with @fid
         """
         fid_full_url = 'wrong_url'
         try:
             fid_full_url = self.get_fid_full_url(fid)
-            LOGGER.debug('Deleting file: fid: %s, fname: %s, fid_full_url: %s' % (fid, fname, fid_full_url))
+            g_logger.debug('Deleting file: fid: %s, file_name: %s, fid_full_url: %s' % (fid, file_name, fid_full_url))
 
             r = requests.delete(fid_full_url)
             if 'size' in r.json():
                 return True
         except Exception as e:
-            err_msg = 'Deleting file: fid: %s, fname: %s, fid_full_url: %s, e: %s' % (fid, fname, fid_full_url, e)
-            LOGGER.error(err_msg)
+            err_msg = 'Deleting file: fid: %s, file_name: %s, fid_full_url: %s, e: %s' % (fid, file_name, fid_full_url, e)
+            g_logger.error(err_msg)
             return False
         return False
     ## -----------------------------------------------------------
@@ -506,7 +506,7 @@ class WeedOperation(object):
         # try:
         #     wak = self.master.acquire_new_assign_key(count)
         #     waks.append(wak)
-        #     fnames.append(fname)
+        #     file_names.append(file_name)
         #     for i in range(count - 1):
         #         _w = {}
         #         _w.update(wak)
@@ -514,26 +514,26 @@ class WeedOperation(object):
         #         _w.update({'fid' : wak.fid + seq})
         #         _w.update_full_urls()
         #         waks.append(_w)
-        #         fname.append(fname + seq)
+        #         file_name.append(file_name + seq)
 
         #     for (i, w) in sequence(waks):
-        #         return WeedOperation.save_file_to_weed(fp, waks[i], fnames[i])
+        #         return WeedOperation.save_file_to_weed(fp, waks[i], file_names[i])
 
         pass
 
 
-    def update_by_fid(self, dst_fid, src_fid, src_fname=''):
+    def update_by_fid(self, dst_fid, src_fid, src_file_name=''):
         """
         replace file@dst_fid with file@src_fid
         """
         try:
-            src_file_rsp = self.read(src_fid, fname=src_fname, just_url=False)
-            fp = io.StringIO(src_file_rsp.content)
-            LOGGER.debug('Updating file: dst_fid: %s, src_fid: %s, src_fname: %s,  fp: %s' % (dst_fid, src_fid, src_fname, fp))
-            return self.update(fp, dst_fid, src_fname)
+            src_file_rsp = self.read(src_fid, file_name=src_file_name, just_url=False)
+            fp = io.BytesIO(src_file_rsp.content)
+            g_logger.debug('Updating file: dst_fid: %s, src_fid: %s, src_file_name: %s,  fp: %s' % (dst_fid, src_fid, src_file_name, fp))
+            return self.update(fp, dst_fid, src_file_name)
         except Exception as e:
-            err_msg = 'Could not Updating file: dst_fid: %s, src_fid: %s, src_fname: %s. e: %s' % (dst_fid, src_fid, src_fname, e)
-            LOGGER.error(err_msg)
+            err_msg = 'Could not Updating file: dst_fid: %s, src_fid: %s, src_file_name: %s. e: %s' % (dst_fid, src_fid, src_file_name, e)
+            g_logger.error(err_msg)
             return None
 
 

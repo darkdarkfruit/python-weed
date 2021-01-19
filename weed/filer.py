@@ -47,21 +47,20 @@ class WeedFiler(object):
     """ weed filer service.
     """
 
-    def __init__(self, host='127.0.0.1', port=27100, protocol='http'):
+    def __init__(self, url_base='http://localhost:27100'):
         """ construct WeedFiler
 
         Arguments:
         - `host`: defaults to '127.0.0.1'
         - `port`: defaults to 27100
+        :param url_base:
         """
-        self.host = host
-        self.port = port
-        self.protocol = protocol
-        self.uri = '%s:%d' % (host, port)
-        self.url = '%s://' % self.protocol + self.uri
+
+        self.url_base = url_base
+        self.uri = self.url_base.split('//')[-1]
 
 
-    def get(self, remote_path):
+    def get(self, remote_path) -> None or {}:
         """ put a file @fp to @remote_path on weedfs
 
         returns @remote_path if succeeds else None
@@ -70,7 +69,7 @@ class WeedFiler(object):
         - `remote_path`:
         - `echo`: if True, print response
         """
-        url = parse.urljoin(self.url, remote_path)
+        url = parse.urljoin(self.url_base, remote_path)
         result = None
         try:
             rsp = requests.get(url)
@@ -79,75 +78,86 @@ class WeedFiler(object):
                            'content_type' : rsp.headers.get('content-type'),
                            'content' : rsp.content}
             else:
-                LOGGER.error('%d GET %s' % (rsp.status_code, url))
+                g_logger.error('%d GET %s' % (rsp.status_code, url))
+                return None
         except Exception as e:
-            LOGGER.error('Error POSTing %s. e:%s' % (url, e))
+            g_logger.error('Error POSTing %s. e:%s' % (url, e))
+            return None
 
         return result
 
 
-    def put(self, fp, remote_path):
+    def put(self, fp, remote_path) -> None or str:
         """ put a file @fp to @remote_path on weedfs
 
         returns @remote_path if succeeds else None
-        Arguments:
-        - `self`:
+        :arg
+        - `fp`: either a file-handler by method open(with binary mode) or a str to the file-path.
         - `remote_path`:
-        - `echo`: if True, print response
+        :returns
+        None or str-of-remote-path
+
         """
-        url = parse.urljoin(self.url, remote_path)
-        _fp = open(fp, 'r') if isinstance(fp, str) else fp
+        url = parse.urljoin(self.url_base, remote_path)
+        is_our_responsibility_to_close_file = False
+        if isinstance(fp, str):
+            _fp = open(fp, 'rb')
+            is_our_responsibility_to_close_file = True
+        else:
+            _fp = fp
+        result = None
         try:
             rsp = requests.post(url, files={'file' : _fp})
             if rsp.ok:
-                return remote_path
+                result = remote_path
             else:
-                LOGGER.error('%d POST %s' % (rsp.status_code, url))
+                g_logger.error('%d POST %s' % (rsp.status_code, url))
         except Exception as e:
-            LOGGER.error('Error POSTing %s. e:%s' % (url, e))
+            g_logger.error('Error POSTing %s. e:%s' % (url, e))
 
         # close fp if parameter fp is a str
-        if isinstance(fp, str):
+        if is_our_responsibility_to_close_file:
             try:
                 _fp.close()
             except Exception as e:
-                LOGGER.warning('Could not close fp: %s. e: %s' % (_fp, e))
+                g_logger.warning('Could not close fp: %s. e: %s' % (_fp, e))
 
-        return None
+        return result
 
 
-    def delete(self, remote_path):
+    def delete(self, remote_path) -> bool:
         ''' remove a @remote_path by http DELETE '''
-        url = parse.urljoin(self.url, remote_path)
+        url = parse.urljoin(self.url_base, remote_path)
         try:
             rsp = requests.delete(url)
             if not rsp.ok:
-                LOGGER.error('Error deleting file: %s. ' % (remote_path))
+                g_logger.error('Error deleting file: %s. ' % (remote_path))
             return rsp.ok
         except Exception as e:
-            LOGGER.error('Error deleting file: %s. e: %s' % (remote_path, e))
+            g_logger.error('Error deleting file: %s. e: %s' % (remote_path, e))
             return False
 
 
-    def list(self, dir, pretty=False):
+    def list(self, dir) -> None or {}:
         ''' list sub folders and files of @dir. show a better look if you turn on @pretty
 
         returns a dict of "sub-folders and files'
         '''
         d = dir if dir.endswith('/') else (dir + '/')
-        url = parse.urljoin(self.url, d)
+        url = parse.urljoin(self.url_base, d)
         headers = {'Accept': 'application/json'}
         try:
             rsp = requests.get(url, headers=headers)
             if not rsp.ok:
-                LOGGER.error('Error listing "%s". [HTTP %d]' % (url, rsp.status_code))
+                g_logger.error('Error listing "%s". [HTTP %d]' % (url, rsp.status_code))
+                return None
             return rsp.json()
         except Exception as e:
-            LOGGER.error('Error listing "%s". e: %s' % (url, e))
+            g_logger.error('Error listing "%s". e: %s' % (url, e))
         return None
 
 
-    def mkdir(self, _dir):
+    def mkdir(self, _dir) -> None or str:
         ''' make dir on filer.
 
         eg:
