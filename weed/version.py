@@ -27,12 +27,12 @@
 '''
 show and set version of python-weed
 '''
-VERSION = (0, 2, 3)
+VERSION = (0, 6, 0)
 
 def get_version():
     ''' return python-weed's version '''
     version = '%s.%s' % (VERSION[0], VERSION[1])
-    if VERSION[2]:
+    if len(VERSION) >= 3:
         version = '%s.%s' % (version, VERSION[2])
     return version
 

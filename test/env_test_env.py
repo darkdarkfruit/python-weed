@@ -26,9 +26,9 @@
 
 import os
 import sys
-import urlparse
-import StringIO
-import logging
+# import urlparse
+# import StringIO
+# import logging
 
 TEST_PATH = os.path.split(__file__)[0]
 WEED_PATH = os.path.split(TEST_PATH)[0]

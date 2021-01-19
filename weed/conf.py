@@ -33,23 +33,24 @@ import logging
 # -----------------------------------------------------------
 # log settings.
 
-LOGGER = logging.getLogger("python-weed")
+g_logger = logging.getLogger("python-weed")
 
 def set_logger_level(logger, logging_level=logging.DEBUG):
     ''' set logger level '''
     logger.setLevel(logging_level)
 
 # for production mode, you might set it to logging.WARNNING
-#set_logger_level(LOGGER, logging.WARNING)
+#set_logger_level(g_logger, logging.WARNING)
 def set_global_logger_level(logging_level=logging.DEBUG):
-    return set_logger_level(LOGGER, logging_level)
+    return set_logger_level(g_logger, logging_level)
 
-def set_global_logger_silent():
+def silent_global_logger():
     ''' silent the global logger '''
     return set_global_logger_level(logging.CRITICAL)
 
 # set_global_logger_level(logging.WARNING)
-set_global_logger_level(logging.WARNING)
+set_global_logger_level(logging.WARNING) # for release
+# set_global_logger_level(logging.DEBUG) # for development
 
 
 ## if we have tornado installed, we can use its pritty-print log
@@ -65,6 +66,7 @@ except:
 
 ## caches volume_id to speed up lookup performance since volume_id will not change frequently
 ##  default is 60 seconds
-VOLUME_CACHE_DURATION_IN_SECONDS = 60
+g_volume_cache_duration_in_seconds = 60
 def set_volume_cache_duration_in_seconds(seconds):
-    VOLUME_CACHE_DURATION_IN_SECONDS = seconds
+    global g_volume_cache_duration_in_seconds
+    g_volume_cache_duration_in_seconds = seconds

@@ -35,11 +35,15 @@ Then, run
 note:
     ensure weed master-server and at least one volume-server are up
     default:
-        master-server: 127.0.0.1:9333
-        volume-server: 127.0.0.1:27000
-        filer-server : 127.0.0.1:27100
+        master-server: localhost:9333
+        volume-server: localhost:27000
+        filer-server : localhost:27100
 
 '''
+import gzip
+import io
+import urllib
+from urllib import parse
 
 from env_test_env import *
 
@@ -56,7 +60,7 @@ from weed.filer import WeedFiler
 
 set_global_logger_level(logging.DEBUG)
 
-WEED_MASTER_IP = '127.0.0.1'
+WEED_MASTER_IP = 'localhost'
 WEED_MASTER_PORT = 9333
 
 
@@ -67,29 +71,29 @@ def test_WeedMaster():
     # assign
     assign_key_dict = master.acquire_assign_info()
     assert isinstance(assign_key_dict, dict)
-    assert assign_key_dict.has_key('fid')
-    assert assign_key_dict['fid'].replace(',', '') > 0x001
+    assert 'fid' in assign_key_dict
+    assert int(assign_key_dict['fid'].replace(',', ''), 16) > 0x001
     fid = assign_key_dict['fid']
     volume_id = fid.split(',')[0]
 
     # lookup
     lookup_dict = master.lookup(fid)
     assert isinstance(lookup_dict, dict)
-    assert lookup_dict.has_key('locations')
+    assert 'locations' in lookup_dict
     locations_list = lookup_dict['locations']
-    assert locations_list[0].has_key('url')
-    assert locations_list[0].has_key('publicUrl')
+    assert 'url' in locations_list[0]
+    assert 'publicUrl' in locations_list[0]
 
     # vacuum
     vacuum_dict = master.vacuum()
     assert isinstance(vacuum_dict, dict)
-    assert vacuum_dict.has_key('Topology')
+    assert 'Topology' in vacuum_dict
 
 
     # status
     status_dict = master.get_status()
     assert isinstance(status_dict, dict)
-    assert status_dict.has_key('Topology')
+    assert 'Topology' in status_dict
 
 
 def test_WeedMaster2():
@@ -99,7 +103,7 @@ def test_WeedMaster2():
     # assign
     wak = master.acquire_new_assign_key(10)
     assert isinstance(wak, dict)
-    assert wak.has_key('fid')
+    assert 'fid' in wak
 
     fid = wak.fid
 
@@ -107,7 +111,7 @@ def test_WeedMaster2():
     locations = []
     for i in fids:
         l = master.lookup(i)
-        assert l.has_key('locations')
+        assert 'locations' in l
         locations.append(l)
 
     for i, l in enumerate(locations):
@@ -123,8 +127,8 @@ def test_WeedVolume():
     # status
     status_dict = volume.get_status()
     assert isinstance(status_dict, dict)
-    assert status_dict.has_key('Version')
-    assert status_dict.has_key('Volumes')
+    assert 'Version' in status_dict
+    assert 'Volumes' in status_dict
 
 
 def test_WeedAssignKey():
@@ -141,7 +145,7 @@ def test_WeedAssignKeyExtended():
 
 def test_WeedOperationResponse():
     wor = WeedOperationResponse()
-    assert wor
+    assert wor.status == Status.FAILED # init is FAILED
     assert wor.__repr__()
 
 
@@ -152,28 +156,28 @@ def test_volume_put_get_delete_file():
     # assign
     assign_key_dict = master.get_assign_key()
     assert isinstance(assign_key_dict, dict)
-    assert assign_key_dict.has_key('fid')
-    assert assign_key_dict['fid'].replace(',', '') > 0x001
+    assert 'fid' in assign_key_dict
+    assert int(assign_key_dict['fid'].replace(',', ''), 16) > 0x001
     fid = assign_key_dict['fid']
     volume_id = fid.split(',')[0]
 
     # lookup
     lookup_dict = master.lookup(fid)
     assert isinstance(lookup_dict, dict)
-    assert lookup_dict.has_key('locations')
+    assert 'locations' in lookup_dict
     locations_list = lookup_dict['locations']
-    assert locations_list[0].has_key('url')
-    assert locations_list[0].has_key('publicUrl')
+    assert 'url' in locations_list[0]
+    assert 'publicUrl' in locations_list[0]
 
     volume_url = 'http://' + locations_list[0]['publicUrl']
-    url = urlparse.urlparse(volume_url)
+    url = parse.urlparse(volume_url)
 
-    #volume = WeedVolume(host=url.hostname, port=url.port)
+    #volume = WeedVolume(host=url_base.hostname, port=url_base.port)
     volume = master.get_volume(fid)
     status_dict = volume.get_status()
     assert isinstance(status_dict, dict)
-    assert status_dict.has_key('Version')
-    assert status_dict.has_key('Volumes')
+    assert 'Version' in status_dict
+    assert 'Volumes' in status_dict
     assert isinstance(status_dict['Volumes'], list)
 
     # file_to_post = './test_file_to_post_to_weed.xml'
@@ -181,7 +185,8 @@ def test_volume_put_get_delete_file():
     file_to_post = os.path.join(TEST_PATH, file_to_update)
 
     with open(file_to_post, 'wb') as tmp_file:
-        tmp_file.write("nonsense " * 1024 * 256)
+        # tmp_file.write(b"nonsense " * 1024 * 256)
+        tmp_file.write(b"nonsense " * 8)
     put_result = volume.put_file(os.path.abspath(file_to_post),fid)
     assert not 'error' in put_result
     assert 'size' in put_result
@@ -189,14 +194,14 @@ def test_volume_put_get_delete_file():
     data = volume.get_file(fid)
     assert data
     # print data
-    with open(file_to_post, 'r') as fd:
+    with open(file_to_post, 'rb') as fd:
         file_data = fd.read()
     assert data == file_data
 
     delete_result = volume.delete_file(fid)
     assert delete_result
-    assert not 'error' in delete_result
-    assert 'size' in delete_result
+    assert not b'error' in delete_result
+    assert b'size' in delete_result
 
 
 def test_accquire_new_fid():
@@ -213,9 +218,9 @@ def test_accquire_new_fid():
 def test_put_a_file_with_fid():
     op = WeedOperation()
     fid = op.acquire_new_fids()[0]
-    fname = 'test_opensource_logo.jpg'
-    fpath = os.path.join(TEST_PATH, fname)
-    assert op.put(open(fpath, 'r'), fid, fname)
+    file_name = 'test_opensource_logo.jpg'
+    fpath = os.path.join(TEST_PATH, file_name)
+    assert op.put(open(fpath, 'rb'), fid, file_name)
 
 
 
@@ -223,26 +228,27 @@ def test_put_file():
     # test put_file in weed.util
     op = WeedOperation()
     fid = ''
-    fname = 'test_opensource_logo.jpg'
-    fpath = os.path.join(TEST_PATH, fname)
+    file_name = 'test_opensource_logo.jpg'
+    fpath = os.path.join(TEST_PATH, file_name)
     master = WeedMaster()
     fid_full_url = master.acquire_new_assign_key()['fid_full_url']
-    print('test_weed.py, fid_full_url: %s, fpath: %s' % (fid_full_url, fpath))
+    print(('test_weed.py, fid_full_url: %s, fpath: %s' % (fid_full_url, fpath)))
     with open(fpath, 'rb') as f:
-        LOGGER.info('fp position: %d' % f.tell())
-        LOGGER.info('fp info: length: %d' % len(f.read()))
+        g_logger.info('fp position: %d' % f.tell())
+        g_logger.info('fp info: length: %d' % len(f.read()))
         f.seek(0)
 
-        rsp = put_file(f, fid_full_url, fname)
-        assert rsp
-        assert rsp.status == 'success'
-        assert rsp.has_key('url') and rsp.url
+        rsp = put_file(f, fid_full_url, file_name)
+        assert rsp.ok()
         assert rsp.storage_size > 0
         fid = os.path.split(fid_full_url)[1]
 
     # read
-    content = op.crud_read(fid, fname).content
-    with open(fpath) as _:
+    wor = op.crud_read(fid, file_name)
+    assert wor
+    content = wor.content
+    assert len(content) > 3
+    with open(fpath, 'rb') as _:
         original_content = _.read()
     assert content == original_content
 
@@ -254,17 +260,19 @@ def test_file_operations():
 
     # create
     fid = ''
-    fname = 'test_opensource_logo.jpg'
-    fpath = os.path.join(TEST_PATH, fname)
-    with open(fpath, 'r') as f:
-        rsp = op.crud_create(f, fname)
-        assert rsp
-        assert rsp.has_key('fid')
-        fid = rsp['fid']
+    file_name = 'test_opensource_logo.jpg'
+    fpath = os.path.join(TEST_PATH, file_name)
+    with open(fpath, 'rb') as f:
+        rsp = op.crud_create(f, file_name)
+        assert rsp.ok()
+        assert len(rsp.fid) > 3
+        fid = rsp.fid
+        print(fid)
+        assert len(fid) > 1
         assert os.path.split(op.get_fid_full_url(fid))[1] == fid
-        assert rsp['fid'].replace(',', '') > '01'
-        assert rsp['url']
-        assert rsp['storage_size'] > 0
+        assert rsp.fid.replace(',', '') > '01'
+        assert rsp.url
+        assert rsp.storage_size > 0
 
     # test exists
     assert op.exists(fid)
@@ -274,27 +282,26 @@ def test_file_operations():
 
 
     # read
-    content = op.get(fid, fname).content
-    content2 = op.get_content(fid, fname)
+    content = op.get(fid, file_name).content
+    content2 = op.get_content(fid, file_name)
     assert content == content2
-    with open(fpath) as _:
-        original_content = _.read()
+    with open(fpath, 'rb') as f:
+        original_content = f.read()
     assert content == original_content
 
     # update
     file_to_update = 'test_file_to_post_to_weed.xml'
     fpath = os.path.join(TEST_PATH, file_to_update)
-    with open(fpath, 'rwb+') as tmp_file:
-        tmp_file.write("testdata " * 1024 * 256)
+    with open(fpath, 'rb+') as tmp_file:
+        tmp_file.write(b"testdata " * 1024 * 256)
         tmp_file.seek(0)
         rsp = op.crud_update(tmp_file, fid)
         assert rsp
-        assert rsp.has_key('fid')
-        fid_2 = rsp['fid']
+        fid_2 = rsp.fid
         assert fid_2 == fid
-        assert rsp['fid'].replace(',', '') > '01'
-        assert rsp['url']
-        assert rsp['storage_size'] > 0
+        assert rsp.fid.replace(',', '') > '01'
+        assert rsp.url
+        assert rsp.storage_size > 0
 
     # delete
     rsp = op.crud_delete(fid)
@@ -305,17 +312,15 @@ def test_file_operations():
 
 def test_WeedFiler():
     wf = WeedFiler()
-    assert wf.host == '127.0.0.1'
-    assert wf.port == 27100
-    assert wf.uri == '127.0.0.1:27100'
-    assert wf.url == 'http://127.0.0.1:27100'
+    assert wf.uri == 'localhost:27100'
+    assert wf.url_base == 'http://localhost:27100'
 
     d = '/test/'
     new_d = '/test/new_dir/'
 
     # put f1
     f1_content = 'hello, how are you'
-    f1 = StringIO.StringIO(f1_content)
+    f1 = io.StringIO(f1_content)
     f1_path = d + 'test.txt'
     assert wf.put(f1, f1_path) == f1_path
 
@@ -324,7 +329,7 @@ def test_WeedFiler():
 
     # put f2
     f2_content = 'hello, how are you?'
-    f2 = StringIO.StringIO(f2_content)
+    f2 = io.StringIO(f2_content)
     f2_path = new_d + 'hello.txt'
     assert wf.put(f2, f2_path) == f2_path
 
@@ -333,26 +338,28 @@ def test_WeedFiler():
     assert isinstance(j, dict)
     # print(j)
 
-    if j.has_key('Directory'):
+    if 'Directory' in j:
         assert j['Directory'] == '/test/new_dir/'
-    if j.has_key('Path'):
-        assert j['Path'] == '/test/new_dir/'
-    assert j['Files']
-    files = j['Files']
-    fnames = []
-    for f in files:
-        fnames.append(f['Name'] if 'Name' in f else f['name'] if 'name' in f else '')
-    assert 'hello.txt' in fnames
+    if 'Path' in j:
+        assert j['Path'] == '/test/new_dir'
+    assert j['Entries']
+    entries = j['Entries']
+    file_names = []
+    for f in entries:
+        if 'FullPath' in f:
+            file_names.append(f['FullPath'].split('/')[-1])
+
+    assert 'hello.txt' in file_names
 
     # get f1
     wf_get = wf.get(f1_path)
-    assert wf_get['content_length'] > 0
+    assert int(wf_get['content_length']) > 0
     if 'gzip' in wf_get['content_type']:
-        content_gz = wf['content']
-        content = gzip.open(StringIO.StringIO(content_gz)).read()
+        content_gz = wf_get['content']
+        content = gzip.open(io.BytesIO(content_gz)).read()
         assert content == f1_content
     elif 'text' in wf_get['content_type']:
-        assert wf_get['content'] == f1_content
+        assert wf_get['content'] == str.encode(f1_content)
     else:
         pass
 
