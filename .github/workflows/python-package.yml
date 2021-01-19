@@ -26,6 +26,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get -y install wget tar
+        rm -rf linux_amd64.tar.gz weed
         wget https://github.com/chrislusf/seaweedfs/releases/download/2.21/linux_amd64.tar.gz
         tar xf linux_amd64.tar.gz
         chmod +x weed
