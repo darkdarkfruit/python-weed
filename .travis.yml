@@ -25,6 +25,7 @@ before_install:
     ls -alh
   - whereis pytest
   - "export PYTHONPATH=$PYTHONPATH:$(pwd)"
+  - echo $PYTHONPATH
   - python setup.py install # just install it
 
 
