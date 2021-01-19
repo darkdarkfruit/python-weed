@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-from weed.version import __version__
+# from weed.version import __version__
 
 DESCRIPTION = "A python module for seaweedfs(old name: weed-fs)"
 
@@ -21,7 +21,7 @@ CLASSIFIERS = [
 ]
 
 setup(name='python-weed',
-      version=__version__,
+      version="0.6.0",
       packages=find_packages(),
       author='darkdarkfruit',
       author_email='darkdarkfruit@gmail.com',

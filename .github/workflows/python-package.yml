@@ -56,4 +56,5 @@ jobs:
         whereis python
         export PYTHONPATH=$PYTHONPATH:$(pwd)
         echo "$PYTHONPATH"
+        python setup.py install
         python -m pytest ./
