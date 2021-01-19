@@ -66,4 +66,9 @@ docs/_build/
 \#*\#
 \#.*\#
 
+.eggs
+.pytest_cache
+
+
+
 .idea
