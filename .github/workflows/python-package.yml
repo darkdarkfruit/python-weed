@@ -40,6 +40,10 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         echo "pwd is $(pwd)"
         ls -alh
+        python --version
+        pytest --version
+        whereis pytest
+        whereis python
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
@@ -48,5 +52,9 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
+        python --version
+        pytest --version
+        whereis pytest
+        whereis python
         export PYTHONPATH=$PYTHONPATH:$(pwd)
         python -m pytest --import-mode=importlib .
