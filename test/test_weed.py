@@ -42,10 +42,12 @@ note:
 '''
 try:
     import sys
-    import pathlib
-    current_dir = pathlib.Path(__file__).parent
+    current_dir = __file__.split('/')[0]
+    parent_dir = current_dir.split('/')[0]
     if current_dir not in sys.path:
         sys.path.append(current_dir)
+    if parent_dir not in sys.path:
+        sys.path.append(parent_dir)
     if '.' not in sys.path:
         sys.path.append('.')
     print(f'sys.path is: \n {sys.path}\n')
