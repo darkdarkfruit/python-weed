@@ -42,6 +42,7 @@ note:
 '''
 try:
     import sys
+
     current_dir = __file__.rsplit('/', 1)[0]
     parent_dir = current_dir.rsplit('/', 1)[0]
     print(f'current_dir: {current_dir}')
@@ -57,17 +58,16 @@ try:
     # sys.exit(1)
 
 except Exception as e:
-    pass
-
+    print(e)
 
 import gzip
 import io
 from urllib import parse
 
-import weed
 from env_test_env import *
 
-print(weed)
+# import weed
+# print(weed)
 from weed.conf import *
 from weed.util import *
 from weed.master import *
