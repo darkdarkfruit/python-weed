@@ -27,10 +27,10 @@ jobs:
       run: |
         sudo apt-get -y install wget tar
         rm -rf linux_amd64.tar.gz weed
-        wget https://github.com/chrislusf/seaweedfs/releases/download/2.21/linux_amd64.tar.gz
+        wget --quiet https://github.com/chrislusf/seaweedfs/releases/download/2.21/linux_amd64.tar.gz
         tar xf linux_amd64.tar.gz
         chmod +x weed
-        mkdir data/volume1
+        mkdir -p data/volume1 data/volume2
         ./weed master > /var/log/weed_master.log 2>&1 &
         ./weed volume -dir="./data/volume1" -max=5  -mserver="localhost:9333" -port=27000 > weed_volume_1.log 2>&1 &
         ./weed volume -dir="./data/volume2" -max=5  -mserver="localhost:9333" -port=27001 > weed_volume_2.log 2>&1 &
