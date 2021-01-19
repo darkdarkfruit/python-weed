@@ -54,7 +54,9 @@ jobs:
       run: |
         python --version
         pytest --version
-        whereis pytest
+        echo $(whereis pytest)
         whereis python
         export PYTHONPATH=$PYTHONPATH:$(pwd)
+        python -m pip install pytest
+        echo $(whereis pytest)
         python -m pytest --import-mode=importlib .
