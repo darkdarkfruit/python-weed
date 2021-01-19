@@ -17,7 +17,7 @@ Python version
 
 Async support?
 ==============
-todo: integrate httpx: https://github.com/encode/httpx
+Not yet. (todo: integrate httpx: https://github.com/encode/httpx)
 
 Install
 =======

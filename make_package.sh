@@ -1,7 +1,7 @@
 #!/bin/sh
-python=python3
+python=python3.9
 echo '** 1. ********* run tests first *******************************'
-py.test weed
+pytest .
 echo '*********** running tests ends  *******************************'
 
 echo 

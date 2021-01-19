@@ -50,7 +50,7 @@ def silent_global_logger():
 
 # set_global_logger_level(logging.WARNING)
 set_global_logger_level(logging.WARNING) # for release
-set_global_logger_level(logging.DEBUG) # for development
+# set_global_logger_level(logging.DEBUG) # for development
 
 
 ## if we have tornado installed, we can use its pritty-print log

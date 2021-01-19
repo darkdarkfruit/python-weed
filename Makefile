@@ -1,43 +1,43 @@
-files = weed/conf.py weed/__init__.py weed/master.py weed/operation.py weed/_test_weed_pytest.py weed/util.py weed/version.py weed/volume.py
-file_pytest_genscript = weed/_test_weed_pytest.py
+files = weed/conf.py weed/__init__.py weed/master.py weed/operation.py weed/util.py weed/version.py weed/volume.py
 
 default: test
 	echo ''
+	pytest .
 
 
-test_python_setup: ${file_pytest_genscript}
-	echo '==> generating "py.test file for packaging in dist"'
-	py.test --genscript=${file_pytest_genscript}
 
-
-# test: ${files} test_python_setup
 test: ${files}
 	echo ''
-	echo '==> use "py.test test" directly: '
-	pytest test
+	echo '==> use "pytest ." directly: '
+	pytest .
 	# echo ''
 	# echo '==> use "python setup.py test": '
 	# python setup.py test
 
+test_with_setup: ${files}
+	echo ''
+	echo '==> use "python setup.py test": '
+	python3.9 setup.py test
+
 # just pytest weed
 stest: 
-	pytest test
+	pytest .
 
 
 # make a source distribution in dist/
 sdist: ${files} test
-	python setup.py sdist
+	python3.9 setup.py sdist
 
 
 # upload to pypi
 upload: sdist
 	# python setup.py sdist upload
-	# pip2 install twine
+	# pip3.9 install twine
 	twine upload dist/*
 
 
 install : test
-	python setup.py install
+	python3.9 setup.py install
 
 
 # git push to github
