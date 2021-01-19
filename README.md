@@ -1,13 +1,11 @@
-python-weed. What is it?
-========================
+# python-weed
 
+## What is it?
 A python module for seaweedfs(https://github.com/chrislusf/seaweedfs.git)
 (Old name is: weed-fs (https://code.google.com/p/weed-fs/)).
 
 
-Python version
-===============
-
+## Python version
 * python3.7+ 
 * Note: For old python2.7 version, use the branch: `v0.2.3-suited-for-python2.7` or use tag: `python2.7`(or `v0.2.3`) of master
 * Note: We always refer python to python3.7+(also, pip to pip3) in the doc as python2 has been deprecated.
@@ -15,24 +13,21 @@ Python version
     * python3.6+ supports F-Strings: https://www.python.org/dev/peps/pep-0498/
     * python3.7 supports dataclass
 
-Async support?
-==============
+## Async support?
 Not yet. (todo: integrate httpx: https://github.com/encode/httpx)
 
-Install
-=======
-
-    pip install python-weed
+## Install(pip means pip3)
+> pip install python-weed
 
 Or if you want the latest version:
+> pip install https://github.com/darkdarkfruit/python-weed/archive/master.zip
 
-    pip install https://github.com/darkdarkfruit/python-weed/archive/master.zip
 
+## Test
 
-Test
-====
-    # Download weedfs(https://github.com/chrislusf/seaweedfs.git) binary and install it.
-
+    # Set up seaweedfs env
+    # Download weedfs(https://github.com/chrislusf/seaweedfs.git) binary and install it. (eg: v2.21)
+    > wget --quiet https://github.com/chrislusf/seaweedfs/releases/download/2.21/linux_amd64.tar.gz
     # Start weedfs servers: master server, volume server, filer server.
     > weed master             # start master server in terminal 1, listens on port:9333 by default. 
     > weed volume -port=27000 # start volume server in terminal 2, listens on 27000
@@ -40,20 +35,18 @@ Test
 
     # start testing python-weed.
     > pip install pytest
-    > pytest test/
+    > pytest .
     
     
-# Build
+## Build
     > python make sdist    
     > # or
     > python=python3 make sdist    
     
 
 
-Shortely
-========
-
-Weed-FS is a simple and highly scalable distributed file system. There are two
+## Short introduction to seaweedfs
+SeaWeedFs is a simple and highly scalable distributed file system. There are two
 objectives:
 
 * to store billions of files!
@@ -63,7 +56,7 @@ Instead of supporting full POSIX file system semantics, Weed-FS choose to
 implement only a key-file mapping. Similar to the word "NoSQL", you can call it
 as "NoFS".  see detail in (https://code.google.com/p/weed-fs/)
 
-And this is a python module for weed-fs.
+And this is a python module for seaweedfs.
 
 Usage (sample)
 ===============

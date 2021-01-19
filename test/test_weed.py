@@ -1,25 +1,25 @@
 # ** -- coding: utf-8 -- **
-#!/usr/bin/env python
+# !/usr/bin/env python
 #
-#Copyright (c) 2011 darkdarkfruit <darkdarkfruit@gmail.com>
+# Copyright (c) 2011 darkdarkfruit <darkdarkfruit@gmail.com>
 #
-#Permission is hereby granted, free of charge, to any person obtaining a copy
-#of this software and associated documentation files (the "Software"), to deal
-#in the Software without restriction, including without limitation the rights
-#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-#copies of the Software, and to permit persons to whom the Software is
-#furnished to do so, subject to the following conditions:
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
 #
-#The above copyright notice and this permission notice shall be included in
-#all copies or substantial portions of the Software.
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
 #
-#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-#THE SOFTWARE.
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
 #
 
 '''
@@ -40,17 +40,29 @@ note:
         filer-server : localhost:27100
 
 '''
+try:
+    import sys
+    import pathlib
+    current_dir = pathlib.Path(__file__).parent
+    if current_dir not in sys.path:
+        sys.path.append(current_dir)
+    if '.' not in sys.path:
+        sys.path.append('.')
+    print(f'sys.path is: \n {sys.path}\n')
+    # import os
+    # sys.exit(1)
+
+except Exception as e:
+    pass
+
 import gzip
 import io
-import urllib
 from urllib import parse
 
+import weed
 from env_test_env import *
 
-
-import weed
 print(weed)
-from weed import master
 from weed.conf import *
 from weed.util import *
 from weed.master import *
@@ -89,7 +101,6 @@ def test_WeedMaster():
     assert isinstance(vacuum_dict, dict)
     assert 'Topology' in vacuum_dict
 
-
     # status
     status_dict = master.get_status()
     assert isinstance(status_dict, dict)
@@ -119,7 +130,6 @@ def test_WeedMaster2():
             assert locations[i] == locations[i + 1]
 
 
-
 def test_WeedVolume():
     volume = WeedVolume()
     assert volume.__repr__()
@@ -145,7 +155,7 @@ def test_WeedAssignKeyExtended():
 
 def test_WeedOperationResponse():
     wor = WeedOperationResponse()
-    assert wor.status == Status.FAILED # init is FAILED
+    assert wor.status == Status.FAILED  # init is FAILED
     assert wor.__repr__()
 
 
@@ -172,7 +182,7 @@ def test_volume_put_get_delete_file():
     volume_url = 'http://' + locations_list[0]['publicUrl']
     url = parse.urlparse(volume_url)
 
-    #volume = WeedVolume(host=url_base.hostname, port=url_base.port)
+    # volume = WeedVolume(host=url_base.hostname, port=url_base.port)
     volume = master.get_volume(fid)
     status_dict = volume.get_status()
     assert isinstance(status_dict, dict)
@@ -187,7 +197,7 @@ def test_volume_put_get_delete_file():
     with open(file_to_post, 'wb') as tmp_file:
         # tmp_file.write(b"nonsense " * 1024 * 256)
         tmp_file.write(b"nonsense " * 8)
-    put_result = volume.put_file(os.path.abspath(file_to_post),fid)
+    put_result = volume.put_file(os.path.abspath(file_to_post), fid)
     assert not 'error' in put_result
     assert 'size' in put_result
 
@@ -223,7 +233,6 @@ def test_put_a_file_with_fid():
     assert op.put(open(fpath, 'rb'), fid, file_name)
 
 
-
 def test_put_file():
     # test put_file in weed.util
     op = WeedOperation()
@@ -253,7 +262,6 @@ def test_put_file():
     assert content == original_content
 
 
-
 def test_file_operations():
     op = WeedOperation()
     assert op.__repr__()
@@ -280,7 +288,6 @@ def test_file_operations():
     assert op.exists('wrong_fid') == False
     assert op.exists(fid.replace(',', '/')) == False
 
-
     # read
     content = op.get(fid, file_name).content
     content2 = op.get_content(fid, file_name)
@@ -306,7 +313,7 @@ def test_file_operations():
     # delete
     rsp = op.crud_delete(fid)
     assert rsp.storage_size > 0
-    rsp = op.crud_delete('3,20323023') # delete an unexisted file, should return False
+    rsp = op.crud_delete('3,20323023')  # delete an unexisted file, should return False
     assert rsp.storage_size == 0
 
 
@@ -366,7 +373,6 @@ def test_WeedFiler():
     # delete f1, f2
     assert wf.delete(f1_path)
     assert wf.delete(f2_path)
-
 
 
 if __name__ == '__main__':

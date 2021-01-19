@@ -67,6 +67,7 @@ docs/_build/
 \#.*\#
 
 .eggs
+python_weed.egg-info
 .pytest_cache
 
 
