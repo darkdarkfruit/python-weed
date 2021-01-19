@@ -12,9 +12,8 @@ python:
 install:
 #  - |
 #    sudo apt-get -y install wget tar
-  - rm -rf linux_amd64.tar.gz weed
   - pip install -r requirements.txt
-  -
+  - rm -rf linux_amd64.tar.gz weed
 #  - pip install -e . > /dev/null 2>&1 &
 
 # command to run tests
