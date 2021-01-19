@@ -7,11 +7,11 @@ DESCRIPTION = "A python module for seaweedfs(old name: weed-fs)"
 LONG_DESCRIPTION = None
 try:
     LONG_DESCRIPTION = open('README.md').read()
-except Exception as e:
-    print(e)
+except:
+    pass
 
 CLASSIFIERS = [
-    'Development Status :: 4 - Beta',  # https://pypi.org/classifiers/
+    'Development Status :: 4 - Beta', #  https://pypi.org/classifiers/
     'Intended Audience :: Developers',
     'License :: OSI Approved :: MIT License',
     'Operating System :: OS Independent',
@@ -36,7 +36,7 @@ setup(name='python-weed',
       requires=['requests'],
       # cmdclass = {'test' : PyTest},
       setup_requires=['pytest-runner'],
-      tests_require=['pytest'],  # https://pythonhosted.org/distutils-pytest/
+      tests_require=['pytest'], #  https://pythonhosted.org/distutils-pytest/
 
       # https://stackoverflow.com/questions/17001010/how-to-run-unittest-discover-from-python-setup-py-test
       # https://pythonhosted.org/distutils-pytest/
