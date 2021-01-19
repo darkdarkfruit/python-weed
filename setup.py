@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-from weed.version import __version__
+from .weed.version import __version__
 
 DESCRIPTION = "A python module for seaweedfs(old name: weed-fs)"
 
