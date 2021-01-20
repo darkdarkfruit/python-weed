@@ -23,9 +23,10 @@ install:
   - whereis pytest
   - "export PYTHONPATH=$PYTHONPATH:$(pwd)"
   - echo $PYTHONPATH
+  - pip install -U pytest
   - python setup.py install # just install it
   - pip install -r requirements.txt
 
 # command to run tests
 script:
-  - python -m pytest --verbose -r A --collect-in-virtualenv test
+  - python -m pytest .
