@@ -72,7 +72,17 @@ from env_test_env import *
 try:
     import weed
 except Exception as e:
-    print(f'Could not import weed, err: {e}')    
+    print(f'Could not import weed, err: {e}')
+    import traceback
+    traceback.print_exc()
+
+try:
+    import python_weed
+except Exception as e:
+    print(f'Could not import python_weed, err: {e}')
+    import traceback
+    traceback.print_exc()
+
 
 
 # import weed
