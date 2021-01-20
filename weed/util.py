@@ -31,7 +31,7 @@ from dataclasses import dataclass
 from enum import Enum
 
 import requests
-from .conf import g_logger
+from weed.conf import g_logger
 
 
 class WeedAssignKey(dict):

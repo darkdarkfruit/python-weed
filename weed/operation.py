@@ -28,16 +28,11 @@ operations to weedfs.
 
 __all__ = ['WeedOperation']
 
-import json
-import random
 import io
-import urllib.parse
-import requests
-from .conf import *
-from .util import *
+import random
 
-from .master import *
-from .volume import *
+from weed.master import *
+from weed.util import *
 
 
 class WeedOperation(object):
@@ -152,7 +147,8 @@ class WeedOperation(object):
             wor.content = rsp.content
             wor.content_type = rsp.headers.get('content-type')
         except Exception as e:
-            err_msg = 'Could not read file fid: %s, file_name: %s, fid_full_url: %s, e: %s' % (fid, file_name, fid_full_url, e)
+            err_msg = 'Could not read file fid: %s, file_name: %s, fid_full_url: %s, e: %s' % (
+                fid, file_name, fid_full_url, e)
             g_logger.error(err_msg)
             wor.status = Status.FAILED
             wor.message = err_msg
@@ -201,7 +197,7 @@ class WeedOperation(object):
                 fid_full_url = self.get_fid_full_url(fid)
         except Exception as e:
             err_msg = 'Could not put file. fp: "%s", file_name: "%s", fid_full_url: "%s", e: %s' % (
-            fp, file_name, fid_full_url, e)
+                fp, file_name, fid_full_url, e)
             g_logger.error(err_msg)
             return None
 
@@ -221,7 +217,7 @@ class WeedOperation(object):
             wor.fid = _fid
         except Exception as e:
             err_msg = 'Could not put file. fp: "%s", file_name: "%s", fid_full_url: "%s", e: %s' % (
-            fp, file_name, fid_full_url, e)
+                fp, file_name, fid_full_url, e)
             g_logger.error(err_msg)
             wor.status = Status.FAILED
             wor.message = err_msg
@@ -265,7 +261,8 @@ class WeedOperation(object):
                     wor.message = err_msg
                     g_logger.error(err_msg)
         except Exception as e:
-            err_msg = 'Deleting file: fid: %s, file_name: %s, fid_full_url: %s, e: %s' % (fid, file_name, fid_full_url, e)
+            err_msg = 'Deleting file: fid: %s, file_name: %s, fid_full_url: %s, e: %s' % (
+                fid, file_name, fid_full_url, e)
             g_logger.error(err_msg)
             wor.status = Status.FAILED
             wor.message = err_msg
@@ -337,11 +334,12 @@ class WeedOperation(object):
             src_file_rsp = self.crud_read(src_fid, file_name=src_file_name)
             fp = io.BytesIO(src_file_rsp.content)
             g_logger.debug(
-                'Updating file: dst_fid: %s, src_fid: %s, src_file_name: %s,  fp: %s' % (dst_fid, src_fid, src_file_name, fp))
+                'Updating file: dst_fid: %s, src_fid: %s, src_file_name: %s,  fp: %s' % (
+                    dst_fid, src_fid, src_file_name, fp))
             return self.crud_update(fp, dst_fid, src_file_name)
         except Exception as e:
             err_msg = 'Could not Updating file: dst_fid: %s, src_fid: %s, src_file_name: %s. e: %s' % (
-            dst_fid, src_fid, src_file_name, e)
+                dst_fid, src_fid, src_file_name, e)
             g_logger.error(err_msg)
             return None
 

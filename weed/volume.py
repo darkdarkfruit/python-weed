@@ -36,7 +36,7 @@ __all__ = ['WeedVolume']
 import json
 import requests
 
-from .conf import g_logger
+from weed.conf import g_logger
 
 
 class WeedVolume(object):

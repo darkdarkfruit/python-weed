@@ -36,18 +36,15 @@ note:
 
 '''
 
-from urllib.parse import urljoin, urlunparse, ParseResult
+from urllib.parse import urljoin
 
 __all__ = ['WeedMaster']
 
 import time
-import json
-import urllib.parse
-import requests
-from .conf import *
-from .util import *
+from weed.conf import *
+from weed.util import *
 
-from .volume import WeedVolume
+from weed.volume import WeedVolume
 
 
 class WeedMaster(object):
