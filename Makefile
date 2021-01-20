@@ -7,6 +7,7 @@ default: test
 
 
 test: ${files}
+	pip3.9 uninstall -y python-weed
 	echo ''
 	echo '==> use "pytest ." directly: '
 	pytest .
@@ -26,6 +27,7 @@ stest:
 
 # make a source distribution in dist/
 sdist: ${files} test
+	rm dist/*
 	python3.9 setup.py sdist
 
 
