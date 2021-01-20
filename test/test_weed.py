@@ -56,6 +56,9 @@ try:
         sys.path.append(parent_dir)
     if '.' not in sys.path:
         sys.path.append('.')
+    wp = parent_dir + '/weed'
+    if wp not in sys.path:
+        sys.path.append(wp)
     print(f'sys.path is: \n {sys.path}\n')
     # import os
     # sys.exit(1)
