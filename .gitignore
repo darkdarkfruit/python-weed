@@ -13,6 +13,7 @@ __pycache__/
 env/
 bin/
 build/
+!build/lib/just-to-track.blank.file.text
 develop-eggs/
 dist/
 eggs/
