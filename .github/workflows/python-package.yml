@@ -57,4 +57,5 @@ jobs:
         export PYTHONPATH=$PYTHONPATH:$(pwd)
         echo "$PYTHONPATH"
         python setup.py install
-        python -m pytest --verbose -r A --rootdir=. --collect-in-virtualenv ./
+        python -m pytest --verbose -r A --collect-in-virtualenv weed
+#        python -m pytest --verbose -r A --rootdir=. --collect-in-virtualenv ./

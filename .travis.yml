@@ -28,4 +28,4 @@ install:
 
 # command to run tests
 script:
-  - python -m pytest --verbose -r A --collect-in-virtualenv ./
+  - python -m pytest --verbose -r A --collect-in-virtualenv test
