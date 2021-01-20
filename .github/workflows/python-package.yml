@@ -62,6 +62,8 @@ jobs:
         pip install wheel
         mkdir -p build/lib
         python setup.py build
+        ls -alh build/*
+        ls -alh build/**/*
         python setup.py install
         ls -alh build/lib/*
         python -m pytest --verbose --collect-in-virtualenv .
