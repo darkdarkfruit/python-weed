@@ -42,6 +42,8 @@ note:
 '''
 try:
     import sys
+    import os
+    print(f'os.curdir: {os.curdir}')
 
     current_dir = __file__.rsplit('/', 1)[0]
     parent_dir = current_dir.rsplit('/', 1)[0]
