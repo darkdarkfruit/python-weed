@@ -27,8 +27,8 @@ jobs:
       run: |
         pushd .
         cd $HOME
-        mkdir weed
-        cd weed
+        mkdir weed && cd weed
+        pwd
         df -h
         df -h .
         rm -rf linux_amd64.tar.gz weed
