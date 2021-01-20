@@ -60,7 +60,7 @@ jobs:
         which pip
         which python
         pip install wheel
-        python setup.py sdist
+        python setup.py build
         python setup.py install
         ls -alh build/lib/*
         python -m pytest --verbose --collect-in-virtualenv .
