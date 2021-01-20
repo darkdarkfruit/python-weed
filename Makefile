@@ -33,7 +33,7 @@ sdist: ${files} test
 upload: sdist
 	# python setup.py sdist upload
 	# pip3.9 install twine
-	twine upload dist/*
+	twine upload --verbose dist/*
 
 
 install : test
