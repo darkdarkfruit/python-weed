@@ -25,6 +25,8 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
+        pushd .
+        cd $HOME
         rm -rf linux_amd64.tar.gz weed
         wget --quiet https://github.com/chrislusf/seaweedfs/releases/download/2.21/linux_amd64.tar.gz
         tar xf linux_amd64.tar.gz
@@ -42,6 +44,7 @@ jobs:
         pytest --version
         whereis pytest
         whereis python
+        popd
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
@@ -50,15 +53,16 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
-        python --version
-        pytest --version
-        echo $(whereis pytest)
-        whereis python
-        export PYTHONPATH=$PYTHONPATH:$(pwd)
-        echo "$PYTHONPATH"
-        which pytest
-        which pip
-        which python
-        pip install -e .
-        python -m pytest --verbose --collect-in-virtualenv .
+        pytest
+#        python --version
+#        pytest --version
+#        echo $(whereis pytest)
+#        whereis python
+#        export PYTHONPATH=$PYTHONPATH:$(pwd)
+#        echo "$PYTHONPATH"
+#        which pytest
+#        which pip
+#        which python
+#        pip install -e .
+#        python -m pytest --verbose --collect-in-virtualenv .
 #        python -m pytest --verbose -r A --rootdir=. --collect-in-virtualenv ./

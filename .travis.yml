@@ -12,6 +12,8 @@ python:
 # command to install dependencies
 install:
   - |
+    pushd .
+    cd $HOME
     rm -rf linux_amd64.tar.gz weed
     wget --quiet https://github.com/chrislusf/seaweedfs/releases/download/2.21/linux_amd64.tar.gz
     tar xf linux_amd64.tar.gz
@@ -20,6 +22,7 @@ install:
     echo "started all weed services"
     echo "pwd is $(pwd)"
     ls -alh
+    popd
   - whereis pytest
   - "export PYTHONPATH=$PYTHONPATH:$(pwd)"
   - echo $PYTHONPATH
