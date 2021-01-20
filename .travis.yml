@@ -18,6 +18,7 @@ install:
     rm -rf linux_amd64.tar.gz weed
     wget --quiet https://github.com/chrislusf/seaweedfs/releases/download/2.21/linux_amd64.tar.gz
     tar xf linux_amd64.tar.gz
+    rm -f linux_amd64.tar.gz
     chmod +x weed
     mkdir -p data/volume1 data/volume2
     ./weed master > weed_master.log 2>&1 &
