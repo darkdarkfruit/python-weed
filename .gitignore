@@ -12,8 +12,10 @@ __pycache__/
 .Python
 env/
 bin/
-build/
+build/*
+!build/lib/
 !build/lib/just-to-track.blank.file.text
+!just-to-track.blank.file.text
 develop-eggs/
 dist/
 eggs/
@@ -74,3 +76,4 @@ python_weed.egg-info
 
 
 .idea
+build/bdist.linux-x86_64/
