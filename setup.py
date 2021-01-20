@@ -1,6 +1,6 @@
-from setuptools import setup, find_packages
+import os
 
-# from weed.version import __version__
+from setuptools import setup, find_packages
 
 DESCRIPTION = "A python module for seaweedfs(old name: weed-fs)"
 
@@ -9,6 +9,18 @@ try:
     LONG_DESCRIPTION = open('README.md').read()
 except Exception as e:
     print(e)
+
+#  https://github.com/navdeep-G/setup.py/blob/master/setup.py
+here = os.path.abspath(os.path.dirname(__file__))
+NAME = 'python-weed'
+# Load the package's __version__.py module as a dictionary.
+VERSION = ''
+about = {}
+if not VERSION:
+    with open(os.path.join(here, "weed", 'version.py')) as f:
+        exec(f.read(), about)
+else:
+    about['__version__'] = VERSION
 
 CLASSIFIERS = [
     'Development Status :: 4 - Beta',  # https://pypi.org/classifiers/
@@ -20,8 +32,8 @@ CLASSIFIERS = [
     'Topic :: Software Development :: Libraries :: Python Modules',
 ]
 
-setup(name='python-weed',
-      version="0.6.0",
+setup(name=NAME,
+      version=about['__version__'],
       packages=find_packages(),
       author='darkdarkfruit',
       author_email='darkdarkfruit@gmail.com',
