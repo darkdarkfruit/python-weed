@@ -69,6 +69,12 @@ from urllib import parse
 
 from env_test_env import *
 
+try:
+    import weed
+except Exception as e:
+    print(f'Could not import weed, err: {e}')    
+
+
 # import weed
 # print(weed)
 from weed.conf import *
