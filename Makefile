@@ -16,6 +16,7 @@ test: ${files}
 	# python setup.py test
 
 test_with_setup: ${files}
+	# pip3.9 install -i https://pypi.org/simple -U python-weed
 	echo ''
 	echo '==> use "python setup.py test": '
 	python3.9 setup.py test
