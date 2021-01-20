@@ -8,6 +8,8 @@ python:
 #  - "3.9-dev"  # 3.9 development branch
 #  - "nightly"  # nightly build
 
+# important: wait for services above to complete, or service in travis-ci might error with: no space left
+# test, 6 is ok, but for tolerance, we set it to 10
 
 # command to install dependencies
 install:
@@ -27,8 +29,6 @@ install:
     ./weed volume -dir="./data/volume1" -max=5  -mserver="127.0.0.1:9333" -ip 127.0.0.1 -port=27000 > weed_volume_1.log 2>&1 &
     ./weed volume -dir="./data/volume2" -max=5  -mserver="127.0.0.1:9333" -ip 127.0.0.1 -port=27001 > weed_volume_2.log 2>&1 &
     ./weed filer -ip 127.0.0.1 -port=27100 -master="127.0.0.1:9333" > weed_filer.log 2>&1 &
-# important: wait for services above to complete, or service in travis-ci might error with: no space left
-# test, 6 is ok, but for tolerance, we set it to 10
     sleep 10
     ls -alh
     echo "cat weed_master.log" && cat weed_master.log
