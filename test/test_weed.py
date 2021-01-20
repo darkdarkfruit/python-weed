@@ -41,6 +41,8 @@ note:
 
 '''
 try:
+    print(f'__name__: {__name__}')
+    print(f'__name__: {__file__}')
     import sys
     import os
     print(f'os.curdir: {os.curdir}')
