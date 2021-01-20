@@ -26,6 +26,7 @@ install:
   - pip install -U pytest
   - pip install wheel
   - python setup.py install # just install it
+  - ls -alh build/lib/*
   - pip install -r requirements.txt
 
 # command to run tests
