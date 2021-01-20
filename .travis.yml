@@ -25,6 +25,7 @@ install:
   - echo $PYTHONPATH
   - pip install -U pytest
   - pip install wheel
+  - mkdir -p build/lib
   - python setup.py build
   - python setup.py install # just install it
   - ls -alh build/lib/*

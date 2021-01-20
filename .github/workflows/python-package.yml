@@ -60,6 +60,7 @@ jobs:
         which pip
         which python
         pip install wheel
+        mkdir -p build/lib
         python setup.py build
         python setup.py install
         ls -alh build/lib/*
