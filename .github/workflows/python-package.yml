@@ -59,13 +59,6 @@ jobs:
         which pytest
         which pip
         which python
-        pip install wheel
-        rm -rf dist/*
-        mkdir -p build/lib
-        python setup.py build
-        python setup.py sdist
-        ls -alh build/lib/*
-        ls -alh dist
-        pip install dist/*.gz
+        pip install -e .
         python -m pytest --verbose --collect-in-virtualenv .
 #        python -m pytest --verbose -r A --rootdir=. --collect-in-virtualenv ./

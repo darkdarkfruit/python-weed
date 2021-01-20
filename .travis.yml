@@ -23,18 +23,8 @@ install:
   - whereis pytest
   - "export PYTHONPATH=$PYTHONPATH:$(pwd)"
   - echo $PYTHONPATH
-  - pip install -U pytest
-  - pip install wheel
-  - rm -rf dist/*
-  - mkdir -p build/lib
-  - python setup.py build
-  - python setup.py sdist
-  - ls -alh build/lib/*
-  - ls -alh dist
-  - pip install dist/*.gz
-  - python setup.py install # just install it
-  - ls -alh build/lib/*
   - pip install -r requirements.txt
+  - pip install -e .
 
 # command to run tests
 script:
