@@ -60,11 +60,12 @@ jobs:
         which pip
         which python
         pip install wheel
+        rm -rf dist/*
         mkdir -p build/lib
         python setup.py build
-        ls -alh build/*
-        ls -alh build/**/*
-        python setup.py install
+        python setup.py sdist
         ls -alh build/lib/*
+        ls -alh dist
+        pip install dist/*.gz
         python -m pytest --verbose --collect-in-virtualenv .
 #        python -m pytest --verbose -r A --rootdir=. --collect-in-virtualenv ./
