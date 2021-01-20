@@ -40,13 +40,12 @@ jobs:
         ./weed volume -dir="./data/volume1" -max=5  -mserver="localhost:9333" -port=27000 > weed_volume_1.log 2>&1 &
         ./weed volume -dir="./data/volume2" -max=5  -mserver="localhost:9333" -port=27001 > weed_volume_2.log 2>&1 &
         ./weed filer -port=27100 -master="localhost:9333" > weed_filer.log 2>&1 &
-        sleep 2
+        sleep 3
         ls -alh
-        echo "cat weed_master.log"
-        cat weed_master.log
-        cat weed_volume_1.log
-        cat weed_volume_2.log
-        cat weed_filer.log
+        echo "cat weed_master.log" && cat weed_master.log
+        echo "weed_volume_1.log" && cat weed_volume_1.log
+        echo "weed_volume_2.log" && cat weed_volume_2.log
+        echo "weed_filer.log" && cat weed_filer.log
         echo "Done cat"
         popd
         python -m pip install flake8 pytest
