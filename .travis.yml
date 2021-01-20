@@ -24,6 +24,7 @@ install:
   - "export PYTHONPATH=$PYTHONPATH:$(pwd)"
   - echo $PYTHONPATH
   - pip install -U pytest
+  - pip install wheel
   - python setup.py install # just install it
   - pip install -r requirements.txt
 

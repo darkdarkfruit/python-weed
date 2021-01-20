@@ -56,9 +56,10 @@ jobs:
         whereis python
         export PYTHONPATH=$PYTHONPATH:$(pwd)
         echo "$PYTHONPATH"
-        python setup.py install
         which pytest
         which pip
         which python
+        pip install wheel
+        python setup.py install
         python -m pytest --verbose --collect-in-virtualenv .
 #        python -m pytest --verbose -r A --rootdir=. --collect-in-virtualenv ./
