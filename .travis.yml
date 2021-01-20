@@ -14,6 +14,7 @@ install:
   - |
     pushd .
     cd $HOME
+    df -h
     rm -rf linux_amd64.tar.gz weed
     wget --quiet https://github.com/chrislusf/seaweedfs/releases/download/2.21/linux_amd64.tar.gz
     tar xf linux_amd64.tar.gz
