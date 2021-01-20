@@ -32,4 +32,4 @@ install:
 
 # command to run tests
 script:
-  - pytest ./
+  - python -m pytest --verbose -r A --collect-in-virtualenv ./
