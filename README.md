@@ -15,9 +15,6 @@ A python module for seaweedfs(https://github.com/chrislusf/seaweedfs.git)
     * python3.6+ supports F-Strings: https://www.python.org/dev/peps/pep-0498/
     * python3.7 supports dataclass
 
-## Async support?
-Not yet. (todo: integrate httpx: https://github.com/encode/httpx)
-
 ## Install(pip means pip3)
 > pip install python-weed
 
@@ -54,6 +51,10 @@ python sdist
 make sdist    
 ```
 
+## Async support?
+Not yet. (todo: integrate httpx: https://github.com/encode/httpx)
+
+
 ## Short introduction to seaweedfs
 SeaWeedFs is a simple and highly scalable distributed file system. There are two
 objectives:
@@ -68,11 +69,8 @@ as "NoFS".  see detail in (https://code.google.com/p/weed-fs/)
 And this is a python module for seaweedfs.
 
 
-Usage log (sample)
-===============
-
-::
-
+## Sample log by using ipython(ipython3.9)
+```jupyterpython
     #----------------------------------------------------------- 
     In [1]: from weed.master import WeedMaster
     
@@ -256,3 +254,4 @@ Usage log (sample)
     f_delete = wf.delete('/helloworld/1.txt')
     print(f_delete)
     #----------------------------------------------------------- 
+```
