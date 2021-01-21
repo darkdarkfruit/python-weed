@@ -16,6 +16,8 @@ test: ${files}
 	# python setup.py test
 
 test_with_setup: ${files}
+	# How to install the latest release from pypi?
+	# pip3.9 uninstall python_weed
 	# pip3.9 install -i https://pypi.org/simple -U python-weed
 	echo ''
 	echo '==> use "python setup.py test": '
