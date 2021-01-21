@@ -22,24 +22,25 @@
 # THE SOFTWARE.
 #
 
-'''
+"""
 utils of python-weed like adaption of weed response, etc..
-'''
+"""
 import json
 import urllib.parse
 from dataclasses import dataclass
 from enum import Enum
 
 import requests
+
 from weed.conf import g_logger
 
 
 class WeedAssignKey(dict):
-    ''' represent this json in dict and object:
+    """ represent this json in dict and object:
 
     {"count":1,"fid":"3,01637037d6","url_base":"127.0.0.1:8080","publicUrl":"localhost:8080"}
 
-    '''
+    """
 
     def __init__(self, json_of_weed_response=None):
 
@@ -62,7 +63,7 @@ class WeedAssignKey(dict):
 
 
 class WeedAssignKeyExtended(WeedAssignKey):
-    ''' extend weed-assign-key for adding these keys:
+    """ extend weed-assign-key for adding these keys:
 
       'full_url', 'full_public_url', 'fid_full_url', 'fid_full_publicUrl':
 
@@ -72,14 +73,14 @@ class WeedAssignKeyExtended(WeedAssignKey):
         self['fid_full_url'] = self['full_url'] + '/' + self['fid']
         self['fid_full_publicUrl'] = self['full_publicUrl'] + '/' + self['fid']
 
-    '''
+    """
 
     def __init__(self, json_of_weed_response=None):
         super(WeedAssignKeyExtended, self).__init__(json_of_weed_response)
         self.update_full_urls()
 
     def update_full_urls(self):
-        ''' update "full_url" and "full_publicUrl" '''
+        """ update "full_url" and "full_publicUrl" """
         self['full_url'] = 'http://' + self['url']
         self['full_publicUrl'] = 'http://' + self['publicUrl']
         self['fid_full_url'] = urllib.parse.urljoin(self['full_url'], self['fid'])
@@ -91,25 +92,29 @@ class WeedAssignKeyExtended(WeedAssignKey):
         # self['fid_full_url'] = parse.urljoin(self['full_url'], self['fid'])
         # self['fid_full_publicUrl'] = parse.urljoin(self['full_publicUrl'], self['fid'])
 
+
 class Status(Enum):
     SUCCESS = 0
     FAILED = 1
     ERROR = 2
 
+
 @dataclass
 class WeedOperationResponse(dict):
-    ''' A dataclass representing response when doing operations like "get, put, delete"
-    '''
-    status : Status = Status.FAILED  # 'success', 'fail' and 'error'. similar to "jsend"
+    """ A dataclass representing response when doing operations like "get, put, delete"
+    """
+    status: Status = Status.FAILED  # 'success', 'fail' and 'error'. similar to "jsend"
     message = 'ok'  # message for the status.
 
     fid: str = ''  # fid in weed-fs
     storage_size: int = 0  # storage_size in weed-fs
     url: str = ''  # url
     name: str = ''  # filename if available
-    etag: str = '' # etag if available
+    etag: str = ''  # etag if available
 
-    content_type: str = ''  # content_type of the file, set when do operation "get". eg: 'text/html; charset=UTF-8'; 'image/jpeg; charset=UTF-8'
+    # content_type of the file, set when do operation "get".
+    # eg: 'text/html; charset=UTF-8'; 'image/jpeg; charset=UTF-8'
+    content_type: str = ''
     content: bytes = b''  # content of the file, set when do operation "get"
 
     def __bool__(self):
@@ -186,7 +191,7 @@ def put_file(fp, fid_full_url, file_name='', http_headers=None):
         wor.status = Status.FAILED
         wor.message = rsp_json['error']
     elif 'size' not in rsp_json or rsp_json['size'] == 0:  # post new file fails
-        err_msg = 'Could not save file on weed-fs with fid_full_url: %s' % (fid_full_url)
+        err_msg = 'Could not save file on weed-fs with fid_full_url: %s' % fid_full_url
         g_logger.error(err_msg)
         wor.status = Status.FAILED
         wor.message = err_msg

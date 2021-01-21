@@ -22,9 +22,9 @@
 # THE SOFTWARE.
 #
 
-'''
+"""
 operations to weedfs.
-'''
+"""
 
 __all__ = ['WeedOperation']
 
@@ -78,7 +78,7 @@ class WeedOperation(object):
             return fids
 
     def get_fid_full_url(self, fid, use_public_url=False) -> None or str:
-        ''' return a random fid_full_url of volume by @fid
+        """ return a random fid_full_url of volume by @fid
 
         eg: (randomly choosed from locations)
           return:  'http://127.0.0.1:27000/3,1234101234'  or
@@ -98,7 +98,7 @@ class WeedOperation(object):
         -----------
 
         return something like: 'http://127.0.0.1:8080/3,0230203913'
-        '''
+        """
         volume_id = fid.split(',')[0]
         full_url = None
         try:
@@ -115,9 +115,9 @@ class WeedOperation(object):
             g_logger.error('Could not get volume location of this fid: %s. Exception is: %s' % (fid, e))
         return full_url
 
-    ## -----------------------------------------------------------
-    ##    weedfs operation: get/put/delete, and CRUD-aliases starts
-    ## -----------------------------------------------------------
+    # -----------------------------------------------------------
+    #    weedfs operation: get/put/delete, and CRUD-aliases starts
+    # -----------------------------------------------------------
     def get(self, fid, file_name='') -> WeedOperationResponse:
         """
         read/get a file from weed-fs with @fid.
@@ -156,7 +156,7 @@ class WeedOperation(object):
         return wor
 
     def get_url(self, fid) -> None or str:
-        ''' return a random fid_full_url of volume by @fid, alias to get_fid_full_url(fid)
+        """ return a random fid_full_url of volume by @fid, alias to get_fid_full_url(fid)
 
         eg: (randomly choosed from locations)
           return:  'http://127.0.0.1:27000/3,1234101234'  or
@@ -164,15 +164,16 @@ class WeedOperation(object):
           return:  'http://127.0.0.1:27002/3,1234101234'
 
         return something like: 'http://127.0.0.1:8080/3,0230203913'
-        '''
+        """
         return self.get_fid_full_url(fid)
 
-    def get_http_response(self, fid_full_url) -> requests.Response:
-        ''' return a "requests.Response" if we want whole info of the http request '''
+    @staticmethod
+    def get_http_response(fid_full_url) -> requests.Response:
+        """ return a "requests.Response" if we want whole info of the http request """
         return requests.get(fid_full_url)
 
     def get_content(self, fid, file_name='') -> bytes:
-        ''' return just file's content. use method "get" to get more file's info '''
+        """ return just file's content. use method "get" to get more file's info """
         return self.get(fid, file_name).content
 
     def put(self, fp, fid=None, file_name='') -> None or WeedOperationResponse:
@@ -271,7 +272,7 @@ class WeedOperation(object):
         return wor
 
     def exists(self, fid) -> bool:
-        ''' detects @fid's existence '''
+        """ detects @fid's existence """
         if ',' not in fid:  # fid should have a volume_id
             return False
         try:
@@ -317,9 +318,9 @@ class WeedOperation(object):
         g_logger.info('--> Trying to delete a file@fid:%s, file_name: %s' % (fid, file_name))
         return self.delete(fid=fid, file_name=file_name)
 
-    ## -----------------------------------------------------------
-    ##    weedfs operation: CRUD ends
-    ## -----------------------------------------------------------
+    # -----------------------------------------------------------
+    #    weedfs operation: CRUD ends
+    # -----------------------------------------------------------
 
     # def create_multiple(self, fp_array):
     #     ''' create/save multiple files '''

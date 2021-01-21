@@ -22,7 +22,7 @@
 # THE SOFTWARE.
 #
 
-'''
+"""
 jsend test
 ==========
 You should have py.test installed first.
@@ -39,34 +39,34 @@ note:
         volume-server: localhost:27000
         filer-server : localhost:27100
 
-'''
-try:
-    print(f'__name__: {__name__}')
-    print(f'__file__: {__file__}')
-    import sys
-    import os
-    print(f'os.curdir: {os.curdir}')
-    print(f'os.curdir: {os.path.abspath(os.curdir)}')
-
-    current_dir = __file__.rsplit('/', 1)[0]
-    parent_dir = current_dir.rsplit('/', 1)[0]
-    print(f'current_dir: {current_dir}')
-    print(f'parent_dir: {parent_dir}')
-    if current_dir not in sys.path:
-        sys.path.append(current_dir)
-    if parent_dir not in sys.path:
-        sys.path.append(parent_dir)
-    if '.' not in sys.path:
-        sys.path.append('.')
-    wp = parent_dir + '/weed'
-    if wp not in sys.path:
-        sys.path.append(wp)
-    print(f'sys.path is: \n {sys.path}\n')
-    # import os
-    # sys.exit(1)
-
-except Exception as e:
-    print(e)
+"""
+# try:
+#     print(f'__name__: {__name__}')
+#     print(f'__file__: {__file__}')
+#     import sys
+#     import os
+#     print(f'os.curdir: {os.curdir}')
+#     print(f'os.curdir: {os.path.abspath(os.curdir)}')
+#
+#     current_dir = __file__.rsplit('/', 1)[0]
+#     parent_dir = current_dir.rsplit('/', 1)[0]
+#     print(f'current_dir: {current_dir}')
+#     print(f'parent_dir: {parent_dir}')
+#     if current_dir not in sys.path:
+#         sys.path.append(current_dir)
+#     if parent_dir not in sys.path:
+#         sys.path.append(parent_dir)
+#     if '.' not in sys.path:
+#         sys.path.append('.')
+#     wp = parent_dir + '/weed'
+#     if wp not in sys.path:
+#         sys.path.append(wp)
+#     print(f'sys.path is: \n {sys.path}\n')
+#     # import os
+#     # sys.exit(1)
+#
+# except Exception as e:
+#     print(e)
 
 import gzip
 import io
@@ -79,15 +79,15 @@ try:
 except Exception as e:
     print(f'Could not import weed, err: {e}')
     import traceback
+
     traceback.print_exc()
 
-try:
-    import python_weed
-except Exception as e:
-    print(f'Could not import python_weed, err: {e}')
-    import traceback
-    traceback.print_exc()
-
+# try:
+#     import python_weed
+# except Exception as e:
+#     print(f'Could not import python_weed, err: {e}')
+#     import traceback
+#     traceback.print_exc()
 
 
 # import weed
@@ -105,7 +105,8 @@ WEED_MASTER_IP = 'localhost'
 WEED_MASTER_PORT = 9333
 
 
-def test_WeedMaster():
+# noinspection DuplicatedCode
+def test_weed_master():
     master = WeedMaster()
     assert master.__repr__()
 
@@ -116,6 +117,7 @@ def test_WeedMaster():
     assert int(assign_key_dict['fid'].replace(',', ''), 16) > 0x001
     fid = assign_key_dict['fid']
     volume_id = fid.split(',')[0]
+    assert len(volume_id) >= 1
 
     # lookup
     lookup_dict = master.lookup(fid)
@@ -136,7 +138,7 @@ def test_WeedMaster():
     assert 'Topology' in status_dict
 
 
-def test_WeedMaster2():
+def test_weed_master_2():
     master = WeedMaster()
     assert master.__repr__()
 
@@ -159,7 +161,7 @@ def test_WeedMaster2():
             assert l[i] == l[i + 1]
 
 
-def test_WeedVolume():
+def test_weed_volume():
     volume = WeedVolume()
     assert volume.__repr__()
 
@@ -170,24 +172,25 @@ def test_WeedVolume():
     assert 'Volumes' in status_dict
 
 
-def test_WeedAssignKey():
+def test_weed_assign_key():
     wak = WeedAssignKey()
     assert wak
     assert wak.__repr__()
 
 
-def test_WeedAssignKeyExtended():
+def test_weed_assign_key_extended():
     wak = WeedAssignKeyExtended()
     assert wak
     assert wak.__repr__()
 
 
-def test_WeedOperationResponse():
+def test_weed_operation_response():
     wor = WeedOperationResponse()
     assert wor.status == Status.FAILED  # init is FAILED
     assert wor.__repr__()
 
 
+# noinspection DuplicatedCode
 def test_volume_put_get_delete_file():
     master = WeedMaster()
     assert master.__repr__()
@@ -199,6 +202,7 @@ def test_volume_put_get_delete_file():
     assert int(assign_key_dict['fid'].replace(',', ''), 16) > 0x001
     fid = assign_key_dict['fid']
     volume_id = fid.split(',')[0]
+    assert len(volume_id) >= 1
 
     # lookup
     lookup_dict = master.lookup(fid)
@@ -210,6 +214,7 @@ def test_volume_put_get_delete_file():
 
     volume_url = 'http://' + locations_list[0]['publicUrl']
     url = parse.urlparse(volume_url)
+    assert url is not None
 
     # volume = WeedVolume(host=url_base.hostname, port=url_base.port)
     volume = master.get_volume(fid)
@@ -227,7 +232,7 @@ def test_volume_put_get_delete_file():
         # tmp_file.write(b"nonsense " * 1024 * 256)
         tmp_file.write(b"nonsense " * 8)
     put_result = volume.put_file(os.path.abspath(file_to_post), fid)
-    assert not 'error' in put_result
+    assert 'error' not in put_result
     assert 'size' in put_result
 
     data = volume.get_file(fid)
@@ -239,7 +244,7 @@ def test_volume_put_get_delete_file():
 
     delete_result = volume.delete_file(fid)
     assert delete_result
-    assert not b'error' in delete_result
+    assert b'error' not in delete_result
     assert b'size' in delete_result
 
 
@@ -265,7 +270,7 @@ def test_put_a_file_with_fid():
 def test_put_file():
     # test put_file in weed.util
     op = WeedOperation()
-    fid = ''
+    # fid = ''
     file_name = 'test_opensource_logo.jpg'
     fpath = os.path.join(TEST_PATH, file_name)
     master = WeedMaster()
@@ -296,7 +301,7 @@ def test_file_operations():
     assert op.__repr__()
 
     # create
-    fid = ''
+    # fid = ''
     file_name = 'test_opensource_logo.jpg'
     fpath = os.path.join(TEST_PATH, file_name)
     with open(fpath, 'rb') as f:
@@ -313,9 +318,9 @@ def test_file_operations():
 
     # test exists
     assert op.exists(fid)
-    assert op.exists(fid + 'wrong_fid') == False
-    assert op.exists('wrong_fid') == False
-    assert op.exists(fid.replace(',', '/')) == False
+    assert op.exists(fid + 'wrong_fid') is False
+    assert op.exists('wrong_fid') is False
+    assert op.exists(fid.replace(',', '/')) is False
 
     # read
     content = op.get(fid, file_name).content
@@ -346,7 +351,7 @@ def test_file_operations():
     assert rsp.storage_size == 0
 
 
-def test_WeedFiler():
+def test_weed_filer():
     wf = WeedFiler()
     assert wf.uri == 'localhost:27100'
     assert wf.url_base == 'http://localhost:27100'
@@ -405,7 +410,7 @@ def test_WeedFiler():
 
 
 if __name__ == '__main__':
-    test_WeedMaster()
-    test_WeedVolume()
+    test_weed_master()
+    test_weed_volume()
     test_file_operations()
     test_volume_put_get_delete_file()

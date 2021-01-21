@@ -22,12 +22,12 @@
 # THE SOFTWARE.
 #
 
-'''
+"""
 python interface of weed-fs filer service.
 currently, weed-fs supports filer service from v0.52 and above.
 
 in this module, default filer service port is set to: 27100
-'''
+"""
 
 __all__ = ['WeedFiler']
 
@@ -35,7 +35,7 @@ import io
 import os
 from urllib import parse
 
-from util import *
+from weed.util import *
 
 
 class WeedFiler(object):
@@ -55,7 +55,7 @@ class WeedFiler(object):
         self.uri = self.url_base.split('//')[-1]
 
     def get(self, remote_path) -> None or {}:
-        """ put a file @fp to @remote_path on weedfs
+        """ put a file @fp to @remote_path on seaweedfs
 
         returns @remote_path if succeeds else None
         Arguments:
@@ -64,13 +64,13 @@ class WeedFiler(object):
         - `echo`: if True, print response
         """
         url = parse.urljoin(self.url_base, remote_path)
-        result = None
         try:
             rsp = requests.get(url)
             if rsp.ok:
                 result = {'content_length': rsp.headers.get('content-length'),
                           'content_type': rsp.headers.get('content-type'),
                           'content': rsp.content}
+                return result
             else:
                 g_logger.error('%d GET %s' % (rsp.status_code, url))
                 return None
@@ -78,10 +78,8 @@ class WeedFiler(object):
             g_logger.error('Error POSTing %s. e:%s' % (url, e))
             return None
 
-        return result
-
     def put(self, fp, remote_path) -> None or str:
-        """ put a file @fp to @remote_path on weedfs
+        """ put a file @fp to @remote_path on seaweedfs
 
         returns @remote_path if succeeds else None
         :arg
@@ -118,23 +116,23 @@ class WeedFiler(object):
         return result
 
     def delete(self, remote_path) -> bool:
-        ''' remove a @remote_path by http DELETE '''
+        """ remove a @remote_path by http DELETE """
         url = parse.urljoin(self.url_base, remote_path)
         try:
             rsp = requests.delete(url)
             if not rsp.ok:
-                g_logger.error('Error deleting file: %s. ' % (remote_path))
+                g_logger.error('Error deleting file: %s. ' % remote_path)
             return rsp.ok
         except Exception as e:
             g_logger.error('Error deleting file: %s. e: %s' % (remote_path, e))
             return False
 
-    def list(self, dir) -> None or {}:
-        ''' list sub folders and files of @dir. show a better look if you turn on @pretty
+    def list(self, directory) -> None or {}:
+        """ list sub folders and files of @dir. show a better look if you turn on @pretty
 
         returns a dict of "sub-folders and files'
-        '''
-        d = dir if dir.endswith('/') else (dir + '/')
+        """
+        d = directory if directory.endswith('/') else (directory + '/')
         url = parse.urljoin(self.url_base, d)
         headers = {'Accept': 'application/json'}
         try:
@@ -147,13 +145,13 @@ class WeedFiler(object):
             g_logger.error('Error listing "%s". e: %s' % (url, e))
         return None
 
-    def mkdir(self, _dir) -> None or str:
-        ''' make dir on filer.
+    def mkdir(self, directory) -> None or str:
+        """ make dir on filer.
 
         eg:
            mkdir('/image/avatar').
            mkdir('/image/avatar/helloworld')
 
         We will post a file named '.info' to @_dir.
-        '''
-        return self.put(io.StringIO('.info'), os.path.join(_dir, '.info'))
+        """
+        return self.put(io.StringIO('.info'), os.path.join(directory, '.info'))

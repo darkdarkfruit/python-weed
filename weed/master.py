@@ -23,7 +23,7 @@
 #
 
 
-'''
+"""
 python interface of weed-fs.
 (https://code.google.com/p/weed-fs/)
 
@@ -34,7 +34,7 @@ note:
         volume-server: 127.0.0.1:8080
 
 
-'''
+"""
 
 from urllib.parse import urljoin
 
@@ -95,7 +95,7 @@ class WeedMaster(object):
         return result
 
     def get_assign_key(self) -> None or {}:
-        ''' deprecated. Please use acquie_new_assign_key function instead '''
+        """ deprecated. Please use acquie_new_assign_key function instead """
         return self.acquire_assign_info()
 
     def acquire_new_assign_key(self, count=1) -> None or WeedAssignKeyExtended:
@@ -117,7 +117,7 @@ class WeedMaster(object):
 
         """
         assign_key_url = urljoin(self.url_assign, '?count=' + str(count))
-        dst_volume_url = None
+        # dst_volume_url = None
         wak = WeedAssignKeyExtended()
         try:
             g_logger.debug('Getting new dst_volume_url with master-assign-key-url_base: %s' % assign_key_url)
@@ -162,11 +162,11 @@ class WeedMaster(object):
             _volume_id = volume_id_or_fid.split('/')[0]
         else:
             _volume_id = volume_id_or_fid
-        result = None
+        # result = None
         try:
             # g_logger.warning('id(master): %x, cache should be hit: %s' % (id(self), self.volumes_cache.has_key(_volume_id)))
             # g_logger.warning('self.volumes_cache: %s' % self.volumes_cache)
-            ## try cache first
+            # try cache first
             if _volume_id in self.volumes_cache and (
                     time.time() - self.volumes_cache[_volume_id][1]) <= cache_duration_in_seconds:
                 g_logger.debug('volume_cache(lookup by volume_id) hits')
@@ -177,7 +177,7 @@ class WeedMaster(object):
                     return None
                 result = json.loads(r.content)
 
-                ## refresh cache
+                # refresh cache
                 self.volumes_cache.update({_volume_id: (result, time.time())})
                 # g_logger.warning('volume_cache(lookup by volume_id) not hit, dst: %s, keys: %s' % (_volume_id, self.volumes_cache.keys())
 
@@ -190,7 +190,7 @@ class WeedMaster(object):
         return result
 
     def get_volume(self, fid) -> WeedVolume or None:
-        ''' get an instance of WeedVolume by @fid'''
+        """ get an instance of WeedVolume by @fid"""
         lookup_dict = self.lookup(fid)
         if 'locations' in lookup_dict:
             locations_list = lookup_dict['locations']

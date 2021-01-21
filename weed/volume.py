@@ -23,13 +23,13 @@
 #
 
 
-'''
+"""
 python interface of weed-fs.
 (https://code.google.com/p/weed-fs/)
 
-'''
+"""
 
-from urllib.parse import urljoin, urlunparse, ParseResult
+from urllib.parse import urljoin
 
 __all__ = ['WeedVolume']
 
@@ -70,7 +70,7 @@ class WeedVolume(object):
         return result
 
     def put_file(self, absolute_file_path, fid, headers=None) -> None or {}:
-        ''' you can put exact http-headers in @headers to help weed to clarify putting file.
+        """ you can put exact http-headers in @headers to help weed to clarify putting file.
 
         eg:
            @headers = {'content-type' : 'image/png'} or
@@ -81,7 +81,7 @@ class WeedVolume(object):
         Deprecated.
 
         Use util.put_file instead.
-        '''
+        """
         url = urljoin(self.url_base, fid)
         if headers and isinstance(headers, dict):
             files = {'file': (open(absolute_file_path, 'rb')), 'headers': headers}
@@ -104,12 +104,12 @@ class WeedVolume(object):
         return result
 
     def get_file(self, fid) -> bytes or None:
-        ''' Get a file's content by @fid
+        """ Get a file's content by @fid
 
         Deprecated.
 
         Use WeedOperation().get instead.
-        '''
+        """
         url = urljoin(self.url_base, fid)
         try:
             r = requests.get(url)
@@ -126,12 +126,12 @@ class WeedVolume(object):
             return None
 
     def delete_file(self, fid) -> bytes or None:
-        ''' Delete a file by @fid
+        """ Delete a file by @fid
 
         Deprecated.
 
         Use WeedOperation().delete instead.
-        '''
+        """
         url = urljoin(self.url_base, fid)
         try:
             r = requests.delete(url)

@@ -22,7 +22,7 @@
 # THE SOFTWARE.
 #
 
-''' test env setting '''
+""" test env setting """
 
 import os
 import sys
