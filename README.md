@@ -1,4 +1,4 @@
-![test]https://github.com/darkdarkfruit/python-weed/workflows/Python%20package/badge.svg
+![test](https://github.com/darkdarkfruit/python-weed/workflows/Python%20package/badge.svg)
 
 # python-weed
 
