@@ -1,3 +1,14 @@
+Note:
+======
+This file is deprecated as not all change logs are recored in it.
+See the git tag and logs for the full change log.
+
+
+version 0.8.0 released @Thu 21 Jan 2021 09:16 AM UTC
+====================================================
+supports python3.7+
+
+
 version 0.1.7 released @Thu May 29 06:51:48 UTC 2014
 =====================================================
 changelog:
