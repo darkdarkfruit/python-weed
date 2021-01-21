@@ -24,28 +24,35 @@ Not yet. (todo: integrate httpx: https://github.com/encode/httpx)
 Or if you want the latest version:
 > pip install https://github.com/darkdarkfruit/python-weed/archive/master.zip
 
+## Wiki
+[wiki](https://github.com/darkdarkfruit/python-weed/wiki)
 
-## Test
+## Examples
+look at the test files:
+[test_weed.py](./test/test_weed.py)
 
-    # Set up seaweedfs env
-    # Download weedfs(https://github.com/chrislusf/seaweedfs.git) binary and install it. (eg: v2.21)
-    > wget --quiet https://github.com/chrislusf/seaweedfs/releases/download/2.21/linux_amd64.tar.gz
-    # Start weedfs servers: master server, volume server, filer server.
-    > weed master             # start master server in terminal 1, listens on port:9333 by default. 
-    > weed volume -port=27000 # start volume server in terminal 2, listens on 27000
-    > weed filer -port=27100  # start filer server in terminal 3, listens on 27100
+## How to test?
+```shell script
+# Set up seaweedfs env
+# Download weedfs(https://github.com/chrislusf/seaweedfs.git) binary and install it. (eg: v2.21)
+> wget --quiet https://github.com/chrislusf/seaweedfs/releases/download/2.21/linux_amd64.tar.gz
+# Start weedfs servers: master server, volume server, filer server.
+> weed master             # start master server in terminal 1, listens on port:9333 by default. 
+> weed volume -port=27000 # start volume server in terminal 2, listens on 27000
+> weed filer -port=27100  # start filer server in terminal 3, listens on 27100
 
-    # start testing python-weed.
-    > pip install pytest
-    > pytest .
-    
+# start testing python-weed.
+> pip install pytest
+> pytest .
+
+```
     
 ## Build
-    > python make sdist    
-    > # or
-    > python=python3 make sdist    
-    
-
+```shell script
+python sdist    
+# or using make
+make sdist    
+```
 
 ## Short introduction to seaweedfs
 SeaWeedFs is a simple and highly scalable distributed file system. There are two
@@ -60,7 +67,8 @@ as "NoFS".  see detail in (https://code.google.com/p/weed-fs/)
 
 And this is a python module for seaweedfs.
 
-Usage (sample)
+
+Usage log (sample)
 ===============
 
 ::
