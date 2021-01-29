@@ -1,4 +1,4 @@
-![test](https://github.com/darkdarkfruit/python-weed/workflows/Python%20package/badge.svg)
+![test](https://github.com/darkdarkfruit/python-weed/workflows/Python%20Test/badge.svg)
 [![Build Status](https://travis-ci.com/darkdarkfruit/python-weed.svg?branch=master)](https://travis-ci.com/darkdarkfruit/python-weed)
 # python-weed
 
