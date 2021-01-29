@@ -5,7 +5,7 @@
 # test, 6 is ok, but for tolerance, we set it to 10
 
 
-name: Python package
+name: Python Test
 
 on:
   push:
